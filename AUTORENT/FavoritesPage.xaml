@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AUTORENT.FavoritesPage"
+             Title="Favoritos"
+             BackgroundColor="#F5F5F5">
+
+    <Grid RowDefinitions="Auto,*" Padding="0">
+        
+        <!-- Header -->
+        <BoxView Grid.Row="0" HeightRequest="120" BackgroundColor="#1E88E5"/>
+        <VerticalStackLayout Grid.Row="0" Padding="20" VerticalOptions="Center">
+            <Label Text="Mis Favoritos" 
+                   FontSize="28" 
+                   FontAttributes="Bold"
+                   TextColor="White"/>
+            <Label Text="Vehículos que te gustan" 
+                   FontSize="14"
+                   TextColor="#E3F2FD"
+                   Margin="0,5,0,0"/>
+        </VerticalStackLayout>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1" Margin="0,-20,0,0">
+            <VerticalStackLayout Spacing="15" Padding="20">
+
+                <!-- Vehículo Favorito 1 -->
+                <Frame CornerRadius="15" 
+                       HasShadow="True"
+                       BackgroundColor="White"
+                       Padding="0">
+                    <Grid RowDefinitions="150,Auto" ColumnDefinitions="*">
+                        <BoxView Grid.Row="0" BackgroundColor="#E3F2FD" CornerRadius="15,15,0,0"/>
+                        <Label Grid.Row="0" 
+                               Text="🚙" 
+                               FontSize="80" 
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                        
+                        <Grid Grid.Row="1" Padding="20" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                            <HorizontalStackLayout Grid.Row="0" Spacing="10">
+                                <Label Text="Toyota Camry 2024" 
+                                       FontSize="20" 
+                                       FontAttributes="Bold"
+                                       TextColor="#212121"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="FillAndExpand"/>
+                                <Label Text="❤️" FontSize="24" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Grid.Row="1" Spacing="15">
+                                <Label Text="⚙️ Automático" FontSize="12" TextColor="#757575"/>
+                                <Label Text="👥 5 pasajeros" FontSize="12" TextColor="#757575"/>
+                            </HorizontalStackLayout>
+
+                            <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" 
+                                       Text="$35/día" 
+                                       FontSize="24" 
+                                       FontAttributes="Bold"
+                                       TextColor="#1E88E5"
+                                       VerticalOptions="Center"/>
+                                <Button Grid.Column="1" 
+                                        Text="Rentar"
+                                        BackgroundColor="#1E88E5"
+                                        TextColor="White"
+                                        CornerRadius="10"
+                                        Padding="20,10"
+                                        FontAttributes="Bold"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Frame>
+
+                <!-- Vehículo Favorito 2 -->
+                <Frame CornerRadius="15" 
+                       HasShadow="True"
+                       BackgroundColor="White"
+                       Padding="0">
+                    <Grid RowDefinitions="150,Auto" ColumnDefinitions="*">
+                        <BoxView Grid.Row="0" BackgroundColor="#FFF3E0" CornerRadius="15,15,0,0"/>
+                        <Label Grid.Row="0" 
+                               Text="🚐" 
+                               FontSize="80" 
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                        
+                        <Grid Grid.Row="1" Padding="20" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                            <HorizontalStackLayout Grid.Row="0" Spacing="10">
+                                <Label Text="Mazda CX-5 2024" 
+                                       FontSize="20" 
+                                       FontAttributes="Bold"
+                                       TextColor="#212121"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="FillAndExpand"/>
+                                <Label Text="❤️" FontSize="24" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Grid.Row="1" Spacing="15">
+                                <Label Text="⚙️ Automático" FontSize="12" TextColor="#757575"/>
+                                <Label Text="👥 5 pasajeros" FontSize="12" TextColor="#757575"/>
+                                <Label Text="🧳 Grande" FontSize="12" TextColor="#757575"/>
+                            </HorizontalStackLayout>
+
+                            <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" 
+                                       Text="$48/día" 
+                                       FontSize="24" 
+                                       FontAttributes="Bold"
+                                       TextColor="#1E88E5"
+                                       VerticalOptions="Center"/>
+                                <Button Grid.Column="1" 
+                                        Text="Rentar"
+                                        BackgroundColor="#1E88E5"
+                                        TextColor="White"
+                                        CornerRadius="10"
+                                        Padding="20,10"
+                                        FontAttributes="Bold"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Frame>
+
+                <!-- Vehículo Favorito 3 -->
+                <Frame CornerRadius="15" 
+                       HasShadow="True"
+                       BackgroundColor="White"
+                       Padding="0">
+                    <Grid RowDefinitions="150,Auto" ColumnDefinitions="*">
+                        <BoxView Grid.Row="0" BackgroundColor="#F3E5F5" CornerRadius="15,15,0,0"/>
+                        <Label Grid.Row="0" 
+                               Text="🏎️" 
+                               FontSize="80" 
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                        
+                        <Grid Grid.Row="1" Padding="20" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                            <HorizontalStackLayout Grid.Row="0" Spacing="10">
+                                <Label Text="Mercedes-Benz Clase C" 
+                                       FontSize="20" 
+                                       FontAttributes="Bold"
+                                       TextColor="#212121"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="FillAndExpand"/>
+                                <Label Text="❤️" FontSize="24" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Grid.Row="1" Spacing="15">
+                                <Label Text="⚙️ Automático" FontSize="12" TextColor="#757575"/>
+                                <Label Text="👥 5 pasajeros" FontSize="12" TextColor="#757575"/>
+                                <Label Text="⭐ Premium" FontSize="12" TextColor="#757575"/>
+                            </HorizontalStackLayout>
+
+                            <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" 
+                                       Text="$85/día" 
+                                       FontSize="24" 
+                                       FontAttributes="Bold"
+                                       TextColor="#1E88E5"
+                                       VerticalOptions="Center"/>
+                                <Button Grid.Column="1" 
+                                        Text="Rentar"
+                                        BackgroundColor="#1E88E5"
+                                        TextColor="White"
+                                        CornerRadius="10"
+                                        Padding="20,10"
+                                        FontAttributes="Bold"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Frame>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

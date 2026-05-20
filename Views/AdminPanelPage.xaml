@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AutoRent.ViewModels"
+             x:Class="AutoRent.Views.AdminPanelPage"
+             Title="Panel Admin">
+
+  <ContentPage.BindingContext>
+    <vm:AdminViewModel />
+  </ContentPage.BindingContext>
+
+  <VerticalStackLayout Padding="12" Spacing="8">
+    <Button Text="Nuevo auto" Command="{Binding NewCarCommand}" />
+    <CollectionView ItemsSource="{Binding Autos}" SelectionMode="Single" SelectedItem="{Binding SelectedAuto}">
+      <CollectionView.ItemTemplate>
+        <DataTemplate>
+          <Frame Padding="8" CornerRadius="8">
+            <Grid ColumnDefinitions="*,Auto">
+              <VerticalStackLayout>
+                <Label Text="{Binding Marca}" FontAttributes="Bold" />
+                <Label Text="{Binding Modelo}" />
+              </VerticalStackLayout>
+              <Button Text="Editar" CommandParameter="{Binding .}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=EditCarCommand}" />
+            </Grid>
+          </Frame>
+        </DataTemplate>
+      </CollectionView.ItemTemplate>
+    </CollectionView>
+  </VerticalStackLayout>
+
+</ContentPage>

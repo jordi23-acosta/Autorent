@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AUTORENT.ProfilePage"
+             Title="Perfil">
+    
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="PageBackgroundLight">#F5F5F5</Color>
+            <Color x:Key="PageBackgroundDark">#121212</Color>
+            <Color x:Key="CardBackgroundLight">White</Color>
+            <Color x:Key="CardBackgroundDark">#1E1E1E</Color>
+            <Color x:Key="TextPrimaryLight">#212121</Color>
+            <Color x:Key="TextPrimaryDark">#FFFFFF</Color>
+            <Color x:Key="TextSecondaryLight">#757575</Color>
+            <Color x:Key="TextSecondaryDark">#B0B0B0</Color>
+            <Color x:Key="DividerLight">#F5F5F5</Color>
+            <Color x:Key="DividerDark">#2C2C2C</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0" x:Name="MainContainer">
+            
+            <!-- Header con perfil -->
+            <Grid HeightRequest="220" BackgroundColor="#1E88E5">
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#1E88E5" Offset="0.0" />
+                        <GradientStop Color="#1565C0" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+                
+                <VerticalStackLayout VerticalOptions="Center" Spacing="15">
+                    <Frame WidthRequest="100" 
+                           HeightRequest="100" 
+                           CornerRadius="50"
+                           BackgroundColor="White"
+                           Padding="0"
+                           HasShadow="True"
+                           HorizontalOptions="Center">
+                        <Label Text="👤" 
+                               FontSize="60" 
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </Frame>
+                    <Label x:Name="UserNameLabel"
+                           Text="Usuario" 
+                           FontSize="24" 
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center"/>
+                    <Label x:Name="UserEmailLabel"
+                           Text="email@ejemplo.com" 
+                           FontSize="14"
+                           TextColor="#E3F2FD"
+                           HorizontalOptions="Center"/>
+                    <Frame Padding="10,5" 
+                           CornerRadius="15"
+                           BackgroundColor="#1565C0"
+                           HasShadow="False"
+                           HorizontalOptions="Center"
+                           Margin="0,5,0,0">
+                        <Label x:Name="UserRoleLabel"
+                               Text="Rol" 
+                               FontSize="12"
+                               TextColor="White"
+                               FontAttributes="Bold"/>
+                    </Frame>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Estadísticas -->
+            <Grid ColumnDefinitions="*,*,*" 
+                  Margin="20,-30,20,20"
+                  HeightRequest="100">
+                <Frame x:Name="StatsFrame1"
+                       Grid.Column="0" 
+                       CornerRadius="15" 
+                       HasShadow="True"
+                       Padding="15">
+                    <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                        <Label Text="12" 
+                               FontSize="24" 
+                               FontAttributes="Bold"
+                               TextColor="#1E88E5"
+                               HorizontalOptions="Center"/>
+                        <Label x:Name="RentasLabel"
+                               Text="Rentas" 
+                               FontSize="12"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame x:Name="StatsFrame2"
+                       Grid.Column="1" 
+                       CornerRadius="15" 
+                       HasShadow="True"
+                       Padding="15">
+                    <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                        <Label Text="3" 
+                               FontSize="24" 
+                               FontAttributes="Bold"
+                               TextColor="#4CAF50"
+                               HorizontalOptions="Center"/>
+                        <Label x:Name="FavoritosLabel"
+                               Text="Favoritos" 
+                               FontSize="12"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame x:Name="StatsFrame3"
+                       Grid.Column="2" 
+                       CornerRadius="15" 
+                       HasShadow="True"
+                       Padding="15">
+                    <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                        <Label Text="⭐" 
+                               FontSize="24"
+                               HorizontalOptions="Center"/>
+                        <Label x:Name="PremiumLabel"
+                               Text="Premium" 
+                               FontSize="12"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Opciones de cuenta -->
+            <Label x:Name="CuentaLabel"
+                   Text="Cuenta" 
+                   FontSize="18" 
+                   FontAttributes="Bold"
+                   Margin="20,10,20,10"/>
+
+            <Frame x:Name="CuentaFrame"
+                   Margin="20,0,20,15" 
+                   CornerRadius="15" 
+                   HasShadow="True"
+                   Padding="0">
+                <VerticalStackLayout Spacing="0">
+                    
+                    <Grid Padding="20" ColumnDefinitions="Auto,*,Auto">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPersonalInfoClicked"/>
+                        </Grid.GestureRecognizers>
+                        <Label Grid.Column="0" Text="👤" FontSize="24" VerticalOptions="Center"/>
+                        <Label x:Name="PersonalInfoLabel"
+                               Grid.Column="1" 
+                               Text="Información Personal" 
+                               FontSize="16"
+                               VerticalOptions="Center"
+                               Margin="15,0,0,0"/>
+                        <Label Grid.Column="2" Text="›" FontSize="24" TextColor="#BDBDBD" VerticalOptions="Center"/>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Preferencias -->
+            <Label x:Name="PreferenciasLabel"
+                   Text="Preferencias" 
+                   FontSize="18" 
+                   FontAttributes="Bold"
+                   Margin="20,10,20,10"/>
+
+            <Frame x:Name="PreferenciasFrame"
+                   Margin="20,0,20,15" 
+                   CornerRadius="15" 
+                   HasShadow="True"
+                   Padding="0">
+                <VerticalStackLayout Spacing="0">
+                    
+                    <Grid Padding="20" ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Text="🌙" FontSize="24" VerticalOptions="Center"/>
+                        <Label x:Name="ModoOscuroLabel"
+                               Grid.Column="1" 
+                               Text="Modo Oscuro" 
+                               FontSize="16"
+                               VerticalOptions="Center"
+                               Margin="15,0,0,0"/>
+                        <Switch x:Name="DarkModeSwitch" 
+                                Grid.Column="2" 
+                                IsToggled="False" 
+                                VerticalOptions="Center"
+                                Toggled="OnDarkModeToggled"/>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Botón de cerrar sesión -->
+            <Button Text="Cerrar Sesión"
+                    BackgroundColor="Transparent"
+                    TextColor="#F44336"
+                    FontAttributes="Bold"
+                    Margin="20,10,20,30"
+                    BorderColor="#F44336"
+                    BorderWidth="2"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Clicked="OnLogoutClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

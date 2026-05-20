@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AUTORENT.Pages.AddVehiclePage"
+             Title="Registrar Vehículo"
+             BackgroundColor="#F8F9FA">
+
+    <Shell.TitleView>
+        <Label Text="Registrar Vehículo"
+               FontSize="18"
+               FontAttributes="Bold"
+               TextColor="#212121"
+               VerticalOptions="Center"
+               HorizontalOptions="Center"/>
+    </Shell.TitleView>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="16,12,16,30">
+
+            <!-- ══════════════════════════════════ -->
+            <!-- SECCIÓN: FOTOS DEL VEHÍCULO        -->
+            <!-- ══════════════════════════════════ -->
+            <Border Stroke="#E0E0E0"
+                    StrokeThickness="1"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="12" Padding="16">
+
+                    <Label Text="📷  Fotos del Vehículo"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"/>
+                    <Label Text="Agrega mínimo 3 fotos (exterior, interior, tablero)"
+                           FontSize="12"
+                           TextColor="#757575"/>
+
+                    <!-- Grid de fotos -->
+                    <Grid x:Name="PhotosGrid"
+                          ColumnDefinitions="*,*,*"
+                          RowDefinitions="Auto"
+                          ColumnSpacing="8">
+
+                        <!-- Foto 1 -->
+                        <Border Grid.Column="0"
+                                HeightRequest="100"
+                                Stroke="#E0E0E0"
+                                StrokeThickness="1.5"
+                                BackgroundColor="#F5F5F5">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnAddPhotoTapped" CommandParameter="0"/>
+                            </Border.GestureRecognizers>
+                            <Grid>
+                                <Image x:Name="Photo1"
+                                       Aspect="AspectFill"
+                                       IsVisible="False"/>
+                                <VerticalStackLayout VerticalOptions="Center" x:Name="AddPhoto1">
+                                    <Label Text="+"
+                                           FontSize="28"
+                                           TextColor="#1E88E5"
+                                           HorizontalOptions="Center"/>
+                                    <Label Text="Exterior"
+                                           FontSize="10"
+                                           TextColor="#9E9E9E"
+                                           HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <!-- Foto 2 -->
+                        <Border Grid.Column="1"
+                                HeightRequest="100"
+                                Stroke="#E0E0E0"
+                                StrokeThickness="1.5"
+                                BackgroundColor="#F5F5F5">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnAddPhotoTapped" CommandParameter="1"/>
+                            </Border.GestureRecognizers>
+                            <Grid>
+                                <Image x:Name="Photo2"
+                                       Aspect="AspectFill"
+                                       IsVisible="False"/>
+                                <VerticalStackLayout VerticalOptions="Center" x:Name="AddPhoto2">
+                                    <Label Text="+"
+                                           FontSize="28"
+                                           TextColor="#1E88E5"
+                                           HorizontalOptions="Center"/>
+                                    <Label Text="Interior"
+                                           FontSize="10"
+                                           TextColor="#9E9E9E"
+                                           HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <!-- Foto 3 -->
+                        <Border Grid.Column="2"
+                                HeightRequest="100"
+                                Stroke="#E0E0E0"
+                                StrokeThickness="1.5"
+                                BackgroundColor="#F5F5F5">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnAddPhotoTapped" CommandParameter="2"/>
+                            </Border.GestureRecognizers>
+                            <Grid>
+                                <Image x:Name="Photo3"
+                                       Aspect="AspectFill"
+                                       IsVisible="False"/>
+                                <VerticalStackLayout VerticalOptions="Center" x:Name="AddPhoto3">
+                                    <Label Text="+"
+                                           FontSize="28"
+                                           TextColor="#1E88E5"
+                                           HorizontalOptions="Center"/>
+                                    <Label Text="Tablero"
+                                           FontSize="10"
+                                           TextColor="#9E9E9E"
+                                           HorizontalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <Label x:Name="PhotoCountLabel"
+                           Text="0 de 3 fotos mínimas"
+                           FontSize="11"
+                           TextColor="#FF5722"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════════════════════════ -->
+            <!-- SECCIÓN: INFORMACIÓN BÁSICA        -->
+            <!-- ══════════════════════════════════ -->
+            <Border Stroke="#E0E0E0"
+                    StrokeThickness="1"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14" Padding="16">
+
+                    <Label Text="🚗  Información del Vehículo"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"/>
+
+                    <!-- Marca y Modelo en fila -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="6">
+                            <Label Text="Marca *" FontSize="13" TextColor="#757575" FontAttributes="Bold"/>
+                            <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="#FAFAFA">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Entry x:Name="BrandEntry"
+                                       Placeholder="Toyota"
+                                       TextColor="#212121"
+                                       PlaceholderColor="#BDBDBD"
+                                       Margin="12,0"
+                                       FontSize="15"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                            <Label Text="Modelo *" FontSize="13" TextColor="#757575" FontAttributes="Bold"/>
+                            <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="#FAFAFA">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Entry x:Name="ModelEntry"
+                                       Placeholder="Corolla"
+                                       TextColor="#212121"
+                                       PlaceholderColor="#BDBDBD"
+                                       Margin="12,0"
+                                       FontSize="15"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Año y Color en fila -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="6">
+                            <Label Text="Año *" FontSize="13" TextColor="#757575" FontAttributes="Bold"/>
+                            <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="#FAFAFA">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Entry x:Name="YearEntry"
+                                       Placeholder="2024"
+                                       Keyboard="Numeric"
+                                       TextColor="#212121"
+                                       PlaceholderColor="#BDBDBD"
+                                       Margin="12,0"
+                                       FontSize="15"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                            <Label Text="Color *" FontSize="13" TextColor="#757575" FontAttributes="Bold"/>
+                            <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="#FAFAFA">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Entry x:Name="ColorEntry"
+                                       Placeholder="Blanco"
+                                       TextColor="#212121"
+                                       PlaceholderColor="#BDBDBD"
+                                       Margin="12,0"
+                                       FontSize="15"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Placas -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Placas *" FontSize="13" TextColor="#757575" FontAttributes="Bold"/>
+                        <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="#FAFAFA">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Entry x:Name="PlatesEntry"
+                                   Placeholder="ABC-123-XYZ"
+                                   TextColor="#212121"
+                                   PlaceholderColor="#BDBDBD"
+                                   Margin="12,0"
+                                   FontSize="15"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Ubicación -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Ubicación" FontSize="13" TextColor="#757575" FontAttributes="Bold"/>
+                        <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="#FAFAFA">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Entry x:Name="LocationEntry"
+                                   Placeholder="Ciudad de México, CDMX"
+                                   TextColor="#212121"
+                                   PlaceholderColor="#BDBDBD"
+                                   Margin="12,0"
+                                   FontSize="15"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════════════════════════ -->
+            <!-- SECCIÓN: CATEGORÍA                 -->
+            <!-- ══════════════════════════════════ -->
+            <Border Stroke="#E0E0E0"
+                    StrokeThickness="1"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="12" Padding="16">
+
+                    <Label Text="🏷️  Categoría"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"/>
+
+                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="10" ColumnSpacing="10">
+
+                        <Border x:Name="EconomicBorder" Grid.Row="0" Grid.Column="0"
+                                Stroke="#1E88E5" StrokeThickness="2" BackgroundColor="#E3F2FD">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCategoryTapped" CommandParameter="Economic"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" Padding="12">
+                                <Label Text="🚙" FontSize="32" HorizontalOptions="Center"/>
+                                <Label Text="Económico" FontSize="13" FontAttributes="Bold"
+                                       HorizontalOptions="Center" TextColor="#1E88E5"/>
+                                <Label Text="Hasta 5 pasajeros" FontSize="10"
+                                       HorizontalOptions="Center" TextColor="#757575"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border x:Name="SUVBorder" Grid.Row="0" Grid.Column="1"
+                                Stroke="#E0E0E0" StrokeThickness="1.5" BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCategoryTapped" CommandParameter="SUV"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" Padding="12">
+                                <Label Text="🚐" FontSize="32" HorizontalOptions="Center"/>
+                                <Label Text="SUV" FontSize="13" FontAttributes="Bold"
+                                       HorizontalOptions="Center" TextColor="#212121"/>
+                                <Label Text="Hasta 7 pasajeros" FontSize="10"
+                                       HorizontalOptions="Center" TextColor="#757575"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border x:Name="LuxuryBorder" Grid.Row="1" Grid.Column="0"
+                                Stroke="#E0E0E0" StrokeThickness="1.5" BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCategoryTapped" CommandParameter="Luxury"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" Padding="12">
+                                <Label Text="🏎️" FontSize="32" HorizontalOptions="Center"/>
+                                <Label Text="Lujo" FontSize="13" FontAttributes="Bold"
+                                       HorizontalOptions="Center" TextColor="#212121"/>
+                                <Label Text="Premium y confort" FontSize="10"
+                                       HorizontalOptions="Center" TextColor="#757575"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border x:Name="VanBorder" Grid.Row="1" Grid.Column="1"
+                                Stroke="#E0E0E0" StrokeThickness="1.5" BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCategoryTapped" CommandParameter="Van"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" Padding="12">
+                                <Label Text="🚌" FontSize="32" HorizontalOptions="Center"/>
+                                <Label Text="Van / Minivan" FontSize="13" FontAttributes="Bold"
+                                       HorizontalOptions="Center" TextColor="#212121"/>
+                                <Label Text="Hasta 12 pasajeros" FontSize="10"
+                                       HorizontalOptions="Center" TextColor="#757575"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════════════════════════ -->
+            <!-- SECCIÓN: CARACTERÍSTICAS           -->
+            <!-- ══════════════════════════════════ -->
+            <Border Stroke="#E0E0E0"
+                    StrokeThickness="1"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="0" Padding="16">
+
+                    <Label Text="⚙️  Características"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"
+                           Margin="0,0,0,14"/>
+
+                    <!-- Asientos -->
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,8">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Número de asientos" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
+                            <Label Text="Capacidad de pasajeros" FontSize="11" TextColor="#9E9E9E"/>
+                        </VerticalStackLayout>
+                        <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">
+                            <Border Stroke="#E0E0E0" StrokeThickness="1" WidthRequest="36" HeightRequest="36">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="18"/></Border.StrokeShape>
+                                <Button Text="−" BackgroundColor="Transparent" TextColor="#212121"
+                                        FontSize="18" Padding="0" Clicked="OnSeatsDecrement"/>
+                            </Border>
+                            <Label x:Name="SeatsLabel" Text="5" FontSize="18" FontAttributes="Bold"
+                                   TextColor="#1E88E5" VerticalOptions="Center" WidthRequest="24"
+                                   HorizontalTextAlignment="Center"/>
+                            <Border Stroke="#1E88E5" StrokeThickness="1" WidthRequest="36" HeightRequest="36">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="18"/></Border.StrokeShape>
+                                <Button Text="+" BackgroundColor="Transparent" TextColor="#1E88E5"
+                                        FontSize="18" Padding="0" Clicked="OnSeatsIncrement"/>
+                            </Border>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" Margin="0,4"/>
+
+                    <!-- Transmisión -->
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Transmisión automática" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
+                            <Label Text="Más fácil de manejar" FontSize="11" TextColor="#9E9E9E"/>
+                        </VerticalStackLayout>
+                        <Switch x:Name="AutomaticSwitch" Grid.Column="1" IsToggled="True"
+                                OnColor="#1E88E5" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" Margin="0,4"/>
+
+                    <!-- Aire acondicionado -->
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Aire acondicionado" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
+                            <Label Text="Clima controlado" FontSize="11" TextColor="#9E9E9E"/>
+                        </VerticalStackLayout>
+                        <Switch x:Name="ACSwitch" Grid.Column="1" IsToggled="True"
+                                OnColor="#1E88E5" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" Margin="0,4"/>
+
+                    <!-- Bluetooth -->
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Bluetooth / CarPlay" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
+                            <Label Text="Conectividad multimedia" FontSize="11" TextColor="#9E9E9E"/>
+                        </VerticalStackLayout>
+                        <Switch x:Name="BluetoothSwitch" Grid.Column="1" IsToggled="True"
+                                OnColor="#1E88E5" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" Margin="0,4"/>
+
+                    <!-- GPS -->
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="GPS integrado" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
+                            <Label Text="Navegación incluida" FontSize="11" TextColor="#9E9E9E"/>
+                        </VerticalStackLayout>
+                        <Switch x:Name="GPSSwitch" Grid.Column="1" IsToggled="False"
+                                OnColor="#1E88E5" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" BackgroundColor="#F0F0F0" Margin="0,4"/>
+
+                    <!-- Mascotas -->
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Permite mascotas" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
+                            <Label Text="Acepta viajeros con mascotas" FontSize="11" TextColor="#9E9E9E"/>
+                        </VerticalStackLayout>
+                        <Switch x:Name="PetsSwitch" Grid.Column="1" IsToggled="False"
+                                OnColor="#1E88E5" VerticalOptions="Center"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════════════════════════ -->
+            <!-- SECCIÓN: PRECIO                    -->
+            <!-- ══════════════════════════════════ -->
+            <Border Stroke="#E0E0E0"
+                    StrokeThickness="1"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="12" Padding="16">
+
+                    <Label Text="💰  Precio de Renta"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"/>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Precio por día (MXN) *" FontSize="13" TextColor="#757575" FontAttributes="Bold"/>
+                        <Border Stroke="#1E88E5" StrokeThickness="1.5" BackgroundColor="#F8FBFF">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <HorizontalStackLayout Spacing="8" Padding="14,0">
+                                <Label Text="$" FontSize="22" TextColor="#1E88E5"
+                                       FontAttributes="Bold" VerticalOptions="Center"/>
+                                <Entry x:Name="PriceEntry"
+                                       Placeholder="500"
+                                       Keyboard="Numeric"
+                                       TextColor="#212121"
+                                       PlaceholderColor="#BDBDBD"
+                                       FontSize="22"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="FillAndExpand"/>
+                                <Label Text="/ día" FontSize="14" TextColor="#9E9E9E"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Recomendación de precio -->
+                    <Border Stroke="#C8E6C9" StrokeThickness="1" BackgroundColor="#F1F8E9">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <HorizontalStackLayout Spacing="10" Padding="12">
+                            <Label Text="💡" FontSize="18" VerticalOptions="Center"/>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Precio sugerido para tu categoría"
+                                       FontSize="12" FontAttributes="Bold" TextColor="#2E7D32"/>
+                                <Label Text="Económico: $300-$500 • SUV: $500-$800 • Lujo: $800-$1,500"
+                                       FontSize="11" TextColor="#388E3C"/>
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════════════════════════ -->
+            <!-- SECCIÓN: DESCRIPCIÓN               -->
+            <!-- ══════════════════════════════════ -->
+            <Border Stroke="#E0E0E0"
+                    StrokeThickness="1"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="10" Padding="16">
+
+                    <Label Text="📝  Descripción"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"/>
+
+                    <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="#FAFAFA">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <Editor x:Name="DescriptionEditor"
+                                Placeholder="Describe tu vehículo: condición, extras, lugar de entrega, reglas de uso..."
+                                HeightRequest="110"
+                                TextColor="#212121"
+                                PlaceholderColor="#BDBDBD"
+                                Margin="12,8"
+                                FontSize="14"/>
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════════════════════════ -->
+            <!-- BOTONES                            -->
+            <!-- ══════════════════════════════════ -->
+            <Border StrokeThickness="0" BackgroundColor="#1E88E5" Margin="0,8,0,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14"/>
+                </Border.StrokeShape>
+                <Button Text="Publicar Vehículo"
+                        BackgroundColor="Transparent"
+                        TextColor="White"
+                        FontSize="17"
+                        FontAttributes="Bold"
+                        HeightRequest="56"
+                        Clicked="OnPublishClicked"
+                        CharacterSpacing="0.3"/>
+            </Border>
+
+            <Button Text="Cancelar"
+                    BackgroundColor="Transparent"
+                    TextColor="#9E9E9E"
+                    FontSize="15"
+                    HeightRequest="44"
+                    Clicked="OnCancelClicked"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

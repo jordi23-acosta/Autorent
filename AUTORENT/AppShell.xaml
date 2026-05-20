@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="AUTORENT.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:AUTORENT"
+    xmlns:pages="clr-namespace:AUTORENT.Pages"
+    x:Name="AppShellRoot"
+    Title="AUTORENT"
+    Shell.FlyoutBehavior="Disabled">
+
+    <TabBar>
+        <ShellContent
+            Title="Inicio"
+            Icon="tab_home.svg"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="MainPage" />
+
+        <ShellContent
+            Title="Mis Rentas"
+            Icon="tab_rentals.svg"
+            ContentTemplate="{DataTemplate local:RentalsPage}"
+            Route="RentalsPage" />
+
+        <ShellContent
+            Title="Mis Autos"
+            Icon="tab_cars.svg"
+            ContentTemplate="{DataTemplate pages:MyVehiclesPage}"
+            Route="MyVehiclesPage" />
+
+        <ShellContent
+            Title="Perfil"
+            Icon="tab_profile.svg"
+            ContentTemplate="{DataTemplate local:ProfilePage}"
+            Route="ProfilePage" />
+    </TabBar>
+
+</Shell>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+  <!-- ===== PIN DE UBICACIÓN ===== -->
+  <path d="M 512 80
+           C 420 80 345 155 345 247
+           C 345 370 512 480 512 480
+           C 512 480 679 370 679 247
+           C 679 155 604 80 512 80 Z"
+        fill="#FF3D00"/>
+  <circle cx="512" cy="240" r="70" fill="white"/>
+  <circle cx="512" cy="240" r="42" fill="#FF3D00"/>
+
+  <!-- ===== CUERPO DEL AUTO ===== -->
+  <!-- Cuerpo principal -->
+  <rect x="120" y="620" width="784" height="180" rx="55" fill="white"/>
+
+  <!-- Cabina -->
+  <path d="M 220 620 Q 260 490 340 465 L 684 465 Q 764 490 804 620 Z"
+        fill="white"/>
+
+  <!-- Ventana izquierda -->
+  <path d="M 255 580 Q 268 500 340 478 L 500 478 L 500 580 Z"
+        fill="#90CAF9" opacity="0.85"/>
+
+  <!-- Ventana derecha -->
+  <path d="M 524 478 L 684 478 Q 756 500 769 580 L 524 580 Z"
+        fill="#90CAF9" opacity="0.85"/>
+
+  <!-- Separador ventanas -->
+  <rect x="506" y="472" width="14" height="112" rx="4" fill="#1565C0" opacity="0.5"/>
+
+  <!-- Rueda izquierda -->
+  <circle cx="280" cy="800" r="95" fill="#1A237E"/>
+  <circle cx="280" cy="800" r="60" fill="#37474F"/>
+  <circle cx="280" cy="800" r="28" fill="#B0BEC5"/>
+
+  <!-- Rueda derecha -->
+  <circle cx="744" cy="800" r="95" fill="#1A237E"/>
+  <circle cx="744" cy="800" r="60" fill="#37474F"/>
+  <circle cx="744" cy="800" r="28" fill="#B0BEC5"/>
+
+  <!-- Faro delantero -->
+  <ellipse cx="880" cy="660" rx="42" ry="28" fill="#FFF9C4" opacity="0.95"/>
+  <ellipse cx="880" cy="660" rx="28" ry="18" fill="#FFEE58"/>
+
+  <!-- Faro trasero -->
+  <ellipse cx="144" cy="660" rx="42" ry="28" fill="#FFCDD2" opacity="0.95"/>
+  <ellipse cx="144" cy="660" rx="28" ry="18" fill="#EF9A9A"/>
+
+  <!-- Línea lateral decorativa -->
+  <rect x="145" y="690" width="734" height="8" rx="4" fill="#BBDEFB" opacity="0.5"/>
+
+</svg>

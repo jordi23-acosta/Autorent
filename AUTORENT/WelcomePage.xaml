@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:AUTORENT"
+             x:Class="AUTORENT.WelcomePage"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="Black">
+
+    <Grid>
+        
+        <!-- Imagen de fondo a pantalla completa -->
+        <Image x:Name="BackgroundImage"
+               Aspect="AspectFill"
+               HorizontalOptions="Fill"
+               VerticalOptions="Fill"/>
+
+        <!-- Degradado oscuro fijo -->
+        <BoxView HorizontalOptions="Fill"
+                 VerticalOptions="Fill"
+                 InputTransparent="True">
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="Transparent" Offset="0.0" />
+                    <GradientStop Color="#55000000" Offset="0.45" />
+                    <GradientStop Color="#CC000000" Offset="1.0" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
+
+        <!-- Contenido superpuesto -->
+        <Grid RowDefinitions="*,Auto,Auto,Auto" Padding="30,60,30,40">
+            
+            <BoxView Grid.Row="0" Color="Transparent" InputTransparent="True"/>
+            
+            <VerticalStackLayout Grid.Row="1" Spacing="12" Margin="0,0,0,30">
+                <Label x:Name="TitleLabel"
+                       FontSize="42" 
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       LineBreakMode="WordWrap"
+                       HorizontalTextAlignment="Start"
+                       LineHeight="1.1"
+                       CharacterSpacing="0.3"/>
+
+                <Label x:Name="DescriptionLabel"
+                       FontSize="16"
+                       TextColor="#E0E0E0"
+                       LineBreakMode="WordWrap"
+                       HorizontalTextAlignment="Start"
+                       LineHeight="1.4"
+                       Opacity="0.9"/>
+            </VerticalStackLayout>
+
+            <HorizontalStackLayout Grid.Row="2"
+                                   x:Name="DotsContainer"
+                                   Spacing="8"
+                                   Margin="0,0,0,25"/>
+            
+            <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="15">
+                
+                <Border Grid.Column="0"
+                        StrokeThickness="2"
+                        Stroke="White"
+                        HeightRequest="56"
+                        BackgroundColor="Transparent">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="28"/>
+                    </Border.StrokeShape>
+                    <Button Text="Iniciar sesión"
+                            BackgroundColor="Transparent"
+                            TextColor="White"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            Clicked="OnLoginClicked"/>
+                </Border>
+                
+                <Border Grid.Column="1"
+                        StrokeThickness="0"
+                        HeightRequest="56"
+                        BackgroundColor="#00E5CC">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="28"/>
+                    </Border.StrokeShape>
+                    <Button Text="Registrarse"
+                            BackgroundColor="Transparent"
+                            TextColor="#000000"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            Clicked="OnRegisterClicked"/>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+
+</ContentPage>

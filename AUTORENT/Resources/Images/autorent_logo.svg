@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  
+  <!-- Fondo circular con degradado azul -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D47A1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="carGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E3F2FD;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#00000033"/>
+    </filter>
+  </defs>
+
+  <!-- Círculo de fondo -->
+  <circle cx="100" cy="100" r="95" fill="url(#bgGrad)" filter="url(#shadow)"/>
+  
+  <!-- Borde sutil -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#1565C0" stroke-width="2"/>
+
+  <!-- ===== CUERPO DEL AUTO ===== -->
+  <!-- Cuerpo principal (parte baja) -->
+  <rect x="30" y="115" width="140" height="32" rx="10" ry="10" fill="url(#carGrad)"/>
+  
+  <!-- Cabina del auto (parte alta) -->
+  <path d="M 55 115 Q 62 88 80 84 L 120 84 Q 138 88 145 115 Z" 
+        fill="url(#carGrad)"/>
+  
+  <!-- Ventana delantera -->
+  <path d="M 88 88 Q 90 86 100 86 L 118 86 Q 130 88 138 108 L 105 108 Z" 
+        fill="#90CAF9" opacity="0.8"/>
+  
+  <!-- Ventana trasera -->
+  <path d="M 62 108 L 62 108 Q 65 90 80 86 L 100 86 L 100 108 Z" 
+        fill="#90CAF9" opacity="0.8"/>
+  
+  <!-- Separador ventanas -->
+  <line x1="100" y1="86" x2="100" y2="108" stroke="#2196F3" stroke-width="2.5"/>
+
+  <!-- Rueda trasera -->
+  <circle cx="65" cy="147" r="16" fill="#1A237E"/>
+  <circle cx="65" cy="147" r="10" fill="#37474F"/>
+  <circle cx="65" cy="147" r="5" fill="#B0BEC5"/>
+  
+  <!-- Rueda delantera -->
+  <circle cx="135" cy="147" r="16" fill="#1A237E"/>
+  <circle cx="135" cy="147" r="10" fill="#37474F"/>
+  <circle cx="135" cy="147" r="5" fill="#B0BEC5"/>
+
+  <!-- Faro delantero -->
+  <ellipse cx="158" cy="122" rx="7" ry="5" fill="#FFF9C4" opacity="0.9"/>
+  <ellipse cx="158" cy="122" rx="5" ry="3.5" fill="#FFEE58"/>
+
+  <!-- Faro trasero -->
+  <ellipse cx="42" cy="122" rx="7" ry="5" fill="#FFCDD2" opacity="0.9"/>
+  <ellipse cx="42" cy="122" rx="5" ry="3.5" fill="#EF9A9A"/>
+
+  <!-- Línea decorativa lateral -->
+  <line x1="45" y1="128" x2="155" y2="128" stroke="#BBDEFB" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- ===== PIN DE UBICACIÓN ===== -->
+  <!-- Sombra del pin -->
+  <ellipse cx="100" cy="78" rx="8" ry="3" fill="#00000033"/>
+  
+  <!-- Pin cuerpo -->
+  <path d="M 100 30 
+           C 86 30 76 40 76 53 
+           C 76 66 100 78 100 78 
+           C 100 78 124 66 124 53 
+           C 124 40 114 30 100 30 Z" 
+        fill="#FF3D00"/>
+  
+  <!-- Pin borde -->
+  <path d="M 100 30 
+           C 86 30 76 40 76 53 
+           C 76 66 100 78 100 78 
+           C 100 78 124 66 124 53 
+           C 124 40 114 30 100 30 Z" 
+        fill="none" stroke="#BF360C" stroke-width="2"/>
+  
+  <!-- Círculo interior del pin -->
+  <circle cx="100" cy="51" r="11" fill="white"/>
+  <circle cx="100" cy="51" r="7" fill="#FF3D00"/>
+
+</svg>

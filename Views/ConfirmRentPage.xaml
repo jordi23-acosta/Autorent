@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AutoRent.ViewModels"
+             x:Class="AutoRent.Views.ConfirmRentPage"
+             Title="Confirmar renta">
+
+  <ContentPage.BindingContext>
+    <vm:ConfirmRentViewModel />
+  </ContentPage.BindingContext>
+
+  <ScrollView>
+    <VerticalStackLayout Padding="16" Spacing="12">
+      <Label Text="Confirmar renta" FontSize="20" FontAttributes="Bold" />
+      <Label Text="Auto:" FontAttributes="Bold" />
+      <Label Text="{Binding AutoInfo}" />
+
+      <Label Text="Duración:" />
+      <Label Text="{Binding DurationLabel}" />
+
+      <Label Text="Total:" />
+      <Label Text="{Binding TotalFormatted}" FontSize="18" />
+
+      <Button Text="Confirmar y pagar" Command="{Binding ConfirmCommand}" />
+    </VerticalStackLayout>
+  </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AUTORENT.Pages.MyVehiclesPage"
+             Title="Mis Vehículos"
+             BackgroundColor="{DynamicResource PageBackground}">
+
+    <Grid RowDefinitions="Auto,*" Padding="0">
+        
+        <!-- Header -->
+        <BoxView Grid.Row="0" HeightRequest="120" BackgroundColor="{StaticResource Primary}"/>
+        <VerticalStackLayout Grid.Row="0" Padding="20" VerticalOptions="Center">
+            <Label Text="Mis Vehículos" 
+                   FontSize="28" 
+                   FontAttributes="Bold"
+                   TextColor="White"/>
+            <Label Text="Administra tu flota" 
+                   FontSize="14"
+                   TextColor="{StaticResource PrimaryDarkText}"
+                   Margin="0,5,0,0"/>
+        </VerticalStackLayout>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1" Margin="0,-20,0,0">
+            <VerticalStackLayout Spacing="15" Padding="20">
+
+                <!-- Botón Agregar Vehículo -->
+                <Button Text="+ Agregar Nuevo Vehículo"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        CornerRadius="15"
+                        HeightRequest="60"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        Clicked="OnAddVehicleClicked"/>
+
+                <!-- Estadísticas -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Frame Grid.Column="0" 
+                           CornerRadius="15" 
+                           BackgroundColor="{DynamicResource CardBackground}"
+                           HasShadow="True"
+                           Padding="15">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnEarningsClicked"/>
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout Spacing="5">
+                            <Label x:Name="EarningsLabel"
+                                   Text="$0" 
+                                   FontSize="20" 
+                                   FontAttributes="Bold"
+                                   TextColor="#4CAF50"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Ganancias" 
+                                   FontSize="10"
+                                   TextColor="{DynamicResource TextSecondary}"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Grid.Column="1" 
+                           CornerRadius="15" 
+                           BackgroundColor="{DynamicResource CardBackground}"
+                           HasShadow="True"
+                           Padding="15">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnRentalsClicked"/>
+                        </Frame.GestureRecognizers>
+                        <VerticalStackLayout Spacing="5">
+                            <Label x:Name="RequestsCountLabel"
+                                   Text="0" 
+                                   FontSize="20" 
+                                   FontAttributes="Bold"
+                                   TextColor="#FF9800"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Solicitudes" 
+                                   FontSize="10"
+                                   TextColor="{DynamicResource TextSecondary}"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Frame Grid.Column="2" 
+                           CornerRadius="15" 
+                           BackgroundColor="{DynamicResource CardBackground}"
+                           HasShadow="True"
+                           Padding="15">
+                        <VerticalStackLayout Spacing="5">
+                            <Label x:Name="ActiveCountLabel"
+                                   Text="0" 
+                                   FontSize="20" 
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Activos" 
+                                   FontSize="10"
+                                   TextColor="{DynamicResource TextSecondary}"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </Grid>
+
+                <!-- Contenedor dinámico de vehículos -->
+                <VerticalStackLayout x:Name="VehiclesContainer" Spacing="15"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

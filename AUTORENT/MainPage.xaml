@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AUTORENT.MainPage"
+             x:Name="MainPageRoot"
+             BackgroundColor="{DynamicResource PageBackground}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+            
+            <!-- Header con gradiente -->
+            <Grid HeightRequest="280" BackgroundColor="#1E88E5">
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#1E88E5" Offset="0.0" />
+                        <GradientStop Color="#1565C0" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+                
+                <VerticalStackLayout VerticalOptions="Center" Padding="30,20">
+                    <Label Text="🚗" FontSize="60" HorizontalOptions="Center" />
+                    <Label Text="AUTORENT" 
+                           FontSize="32" 
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center"
+                           Margin="0,10,0,5"/>
+                    <Label Text="Renta el auto perfecto para tu viaje" 
+                           FontSize="16"
+                           TextColor="#E3F2FD"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Barra de búsqueda -->
+            <Frame Margin="20,-30,20,20" 
+                   Padding="15"
+                   CornerRadius="15"
+                   HasShadow="True"
+                   BackgroundColor="White">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
+                    <Entry Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                           Placeholder="¿Dónde quieres recoger tu auto?"
+                           PlaceholderColor="#9E9E9E"
+                           TextColor="#212121"
+                           FontSize="16"/>
+                    
+                    <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                            Text="Buscar Autos Disponibles"
+                            BackgroundColor="#1E88E5"
+                            TextColor="White"
+                            CornerRadius="10"
+                            HeightRequest="50"
+                            FontAttributes="Bold"
+                            Clicked="OnSearchClicked"/>
+                </Grid>
+            </Frame>
+
+            <!-- Vehículos Disponibles -->
+            <Grid Margin="20,10,20,15" ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Vehículos Disponibles" 
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="#212121"
+                       VerticalOptions="Center"/>
+                
+                <Button Grid.Column="1"
+                        Text="🔄"
+                        FontSize="20"
+                        BackgroundColor="Transparent"
+                        TextColor="#1E88E5"
+                        Padding="10"
+                        Clicked="OnRefreshClicked"
+                        ToolTipProperties.Text="Actualizar lista"/>
+            </Grid>
+
+            <VerticalStackLayout x:Name="VehiclesContainer" 
+                                 Spacing="0" 
+                                 Padding="20,0,20,30"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
