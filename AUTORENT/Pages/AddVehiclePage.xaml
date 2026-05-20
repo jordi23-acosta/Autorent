@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:AUTORENT.ViewModels"
              x:Class="AUTORENT.Pages.AddVehiclePage"
+             x:DataType="viewmodels:AddVehicleViewModel"
              Title="Registrar Vehículo"
              BackgroundColor="#F8F9FA">
 
@@ -130,10 +132,9 @@
                         </Border>
                     </Grid>
 
-                    <Label x:Name="PhotoCountLabel"
-                           Text="0 de 3 fotos mínimas"
+                    <Label Text="{Binding PhotoCountText}"
                            FontSize="11"
-                           TextColor="#FF5722"
+                           TextColor="{Binding PhotoCountColor}"
                            HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Border>
@@ -163,6 +164,7 @@
                                     <RoundRectangle CornerRadius="10"/>
                                 </Border.StrokeShape>
                                 <Entry x:Name="BrandEntry"
+                                       Text="{Binding Brand}"
                                        Placeholder="Toyota"
                                        TextColor="#212121"
                                        PlaceholderColor="#BDBDBD"
@@ -178,6 +180,7 @@
                                     <RoundRectangle CornerRadius="10"/>
                                 </Border.StrokeShape>
                                 <Entry x:Name="ModelEntry"
+                                       Text="{Binding Model}"
                                        Placeholder="Corolla"
                                        TextColor="#212121"
                                        PlaceholderColor="#BDBDBD"
@@ -196,6 +199,7 @@
                                     <RoundRectangle CornerRadius="10"/>
                                 </Border.StrokeShape>
                                 <Entry x:Name="YearEntry"
+                                       Text="{Binding Year}"
                                        Placeholder="2024"
                                        Keyboard="Numeric"
                                        TextColor="#212121"
@@ -212,6 +216,7 @@
                                     <RoundRectangle CornerRadius="10"/>
                                 </Border.StrokeShape>
                                 <Entry x:Name="ColorEntry"
+                                       Text="{Binding Color}"
                                        Placeholder="Blanco"
                                        TextColor="#212121"
                                        PlaceholderColor="#BDBDBD"
@@ -229,6 +234,7 @@
                                 <RoundRectangle CornerRadius="10"/>
                             </Border.StrokeShape>
                             <Entry x:Name="PlatesEntry"
+                                   Text="{Binding Plates}"
                                    Placeholder="ABC-123-XYZ"
                                    TextColor="#212121"
                                    PlaceholderColor="#BDBDBD"
@@ -245,6 +251,7 @@
                                 <RoundRectangle CornerRadius="10"/>
                             </Border.StrokeShape>
                             <Entry x:Name="LocationEntry"
+                                   Text="{Binding Location}"
                                    Placeholder="Ciudad de México, CDMX"
                                    TextColor="#212121"
                                    PlaceholderColor="#BDBDBD"
@@ -371,15 +378,15 @@
                             <Border Stroke="#E0E0E0" StrokeThickness="1" WidthRequest="36" HeightRequest="36">
                                 <Border.StrokeShape><RoundRectangle CornerRadius="18"/></Border.StrokeShape>
                                 <Button Text="−" BackgroundColor="Transparent" TextColor="#212121"
-                                        FontSize="18" Padding="0" Clicked="OnSeatsDecrement"/>
+                                        FontSize="18" Padding="0" Command="{Binding DecrementSeatsCommand}"/>
                             </Border>
-                            <Label x:Name="SeatsLabel" Text="5" FontSize="18" FontAttributes="Bold"
+                            <Label Text="{Binding Seats}" FontSize="18" FontAttributes="Bold"
                                    TextColor="#1E88E5" VerticalOptions="Center" WidthRequest="24"
                                    HorizontalTextAlignment="Center"/>
                             <Border Stroke="#1E88E5" StrokeThickness="1" WidthRequest="36" HeightRequest="36">
                                 <Border.StrokeShape><RoundRectangle CornerRadius="18"/></Border.StrokeShape>
                                 <Button Text="+" BackgroundColor="Transparent" TextColor="#1E88E5"
-                                        FontSize="18" Padding="0" Clicked="OnSeatsIncrement"/>
+                                        FontSize="18" Padding="0" Command="{Binding IncrementSeatsCommand}"/>
                             </Border>
                         </HorizontalStackLayout>
                     </Grid>
@@ -392,7 +399,7 @@
                             <Label Text="Transmisión automática" FontSize="14" TextColor="#212121" FontAttributes="Bold"/>
                             <Label Text="Más fácil de manejar" FontSize="11" TextColor="#9E9E9E"/>
                         </VerticalStackLayout>
-                        <Switch x:Name="AutomaticSwitch" Grid.Column="1" IsToggled="True"
+                        <Switch x:Name="AutomaticSwitch" Grid.Column="1" IsToggled="{Binding IsAutomatic}"
                                 OnColor="#1E88E5" VerticalOptions="Center"/>
                     </Grid>
 
@@ -472,6 +479,7 @@
                                 <Label Text="$" FontSize="22" TextColor="#1E88E5"
                                        FontAttributes="Bold" VerticalOptions="Center"/>
                                 <Entry x:Name="PriceEntry"
+                                       Text="{Binding Price}"
                                        Placeholder="500"
                                        Keyboard="Numeric"
                                        TextColor="#212121"
@@ -524,6 +532,7 @@
                             <RoundRectangle CornerRadius="10"/>
                         </Border.StrokeShape>
                         <Editor x:Name="DescriptionEditor"
+                                Text="{Binding Description}"
                                 Placeholder="Describe tu vehículo: condición, extras, lugar de entrega, reglas de uso..."
                                 HeightRequest="110"
                                 TextColor="#212121"
@@ -547,7 +556,7 @@
                         FontSize="17"
                         FontAttributes="Bold"
                         HeightRequest="56"
-                        Clicked="OnPublishClicked"
+                        Command="{Binding PublishCommand}"
                         CharacterSpacing="0.3"/>
             </Border>
 
@@ -556,7 +565,7 @@
                     TextColor="#9E9E9E"
                     FontSize="15"
                     HeightRequest="44"
-                    Clicked="OnCancelClicked"/>
+                    Command="{Binding CancelCommand}"/>
 
         </VerticalStackLayout>
     </ScrollView>

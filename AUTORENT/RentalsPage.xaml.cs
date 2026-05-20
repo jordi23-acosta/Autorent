@@ -1,102 +1,86 @@
-using AUTORENT.Services;
+using AUTORENT.ViewModels;
 using AUTORENT.Models;
-using System.Collections.ObjectModel;
 
 namespace AUTORENT
 {
     public partial class RentalsPage : ContentPage
     {
-        private readonly AuthService _authService;
-        private ObservableCollection<RentalWithVehicle> _activeRentals = new();
-        private ObservableCollection<RentalWithVehicle> _upcomingRentals = new();
-        private ObservableCollection<RentalWithVehicle> _completedRentals = new();
+        private RentalsViewModel ViewModel => (RentalsViewModel)BindingContext;
 
         public RentalsPage()
         {
             InitializeComponent();
-            _authService = AuthService.Instance;
+            BindingContext = new RentalsViewModel();
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await LoadRentalsAsync();
+            await ViewModel.LoadRentalsAsync();
+            BuildUI();
         }
 
-        private async Task LoadRentalsAsync()
+        private void BuildUI()
         {
-            try
+            ContentArea.Children.Clear();
+
+            // Activas
+            if (ViewModel.ActiveRentals.Count > 0)
             {
-                var client = _authService.GetClient();
-                if (client == null || _authService.CurrentUser == null)
+                ContentArea.Children.Add(new Label
                 {
-                    await DisplayAlert("Error", "No has iniciado sesión", "OK");
-                    return;
-                }
+                    Text = "Activas",
+                    FontSize = 18,
+                    FontAttributes = FontAttributes.Bold,
+                    TextColor = GetDynamicColor("TextPrimary"),
+                    Margin = new Thickness(0, 10, 0, 5)
+                });
 
-                var userId = _authService.CurrentUser.Id;
-
-                // Cargar todas las rentas del usuario (como conductor/renter)
-                var rentalsResponse = await client
-                    .From<Rental>()
-                    .Where(x => x.RenterId == userId)
-                    .Order(x => x.StartDate, Supabase.Postgrest.Constants.Ordering.Descending)
-                    .Get();
-
-                if (rentalsResponse?.Models == null || rentalsResponse.Models.Count == 0)
+                foreach (var rv in ViewModel.ActiveRentals)
                 {
-                    // No hay rentas, mostrar mensaje
-                    ShowEmptyState();
-                    return;
+                    ContentArea.Children.Add(CreateRentalCard(rv, true));
                 }
-
-                // Cargar los vehículos asociados
-                var vehicleIds = rentalsResponse.Models.Select(r => r.VehicleId).Distinct().ToList();
-                var vehiclesResponse = await client
-                    .From<Vehicle>()
-                    .Filter("id", Supabase.Postgrest.Constants.Operator.In, vehicleIds)
-                    .Get();
-
-                var vehiclesDict = vehiclesResponse?.Models?.ToDictionary(v => v.Id) ?? new Dictionary<string, Vehicle>();
-
-                // Combinar rentas con vehículos
-                var rentalsWithVehicles = rentalsResponse.Models
-                    .Select(r => new RentalWithVehicle
-                    {
-                        Rental = r,
-                        Vehicle = vehiclesDict.ContainsKey(r.VehicleId) ? vehiclesDict[r.VehicleId] : null
-                    })
-                    .Where(rv => rv.Vehicle != null)
-                    .ToList();
-
-                // Clasificar rentas
-                var now = DateTime.Now;
-                _activeRentals.Clear();
-                _upcomingRentals.Clear();
-                _completedRentals.Clear();
-
-                foreach (var rv in rentalsWithVehicles)
-                {
-                    if (rv.Rental.Status == RentalStatus.Completed || rv.Rental.Status == RentalStatus.Cancelled)
-                    {
-                        _completedRentals.Add(rv);
-                    }
-                    else if (rv.Rental.StartDate <= now && rv.Rental.EndDate >= now)
-                    {
-                        _activeRentals.Add(rv);
-                    }
-                    else if (rv.Rental.StartDate > now)
-                    {
-                        _upcomingRentals.Add(rv);
-                    }
-                }
-
-                BuildUI();
             }
-            catch (Exception ex)
+
+            // Próximas
+            if (ViewModel.UpcomingRentals.Count > 0)
             {
-                System.Diagnostics.Debug.WriteLine($"Error cargando rentas: {ex.Message}");
-                await DisplayAlert("Error", "No se pudieron cargar las rentas", "OK");
+                ContentArea.Children.Add(new Label
+                {
+                    Text = "Próximas",
+                    FontSize = 18,
+                    FontAttributes = FontAttributes.Bold,
+                    TextColor = GetDynamicColor("TextPrimary"),
+                    Margin = new Thickness(0, 15, 0, 5)
+                });
+
+                foreach (var rv in ViewModel.UpcomingRentals)
+                {
+                    ContentArea.Children.Add(CreateRentalCard(rv, false));
+                }
+            }
+
+            // Historial
+            if (ViewModel.CompletedRentals.Count > 0)
+            {
+                ContentArea.Children.Add(new Label
+                {
+                    Text = "Historial",
+                    FontSize = 18,
+                    FontAttributes = FontAttributes.Bold,
+                    TextColor = GetDynamicColor("TextPrimary"),
+                    Margin = new Thickness(0, 15, 0, 5)
+                });
+
+                foreach (var rv in ViewModel.CompletedRentals)
+                {
+                    ContentArea.Children.Add(CreateCompletedRentalCard(rv));
+                }
+            }
+
+            if (!ViewModel.HasRentals)
+            {
+                ShowEmptyState();
             }
         }
 
@@ -136,71 +120,7 @@ namespace AUTORENT
             });
         }
 
-        private void BuildUI()
-        {
-            ContentArea.Children.Clear();
-
-            // Activas
-            if (_activeRentals.Count > 0)
-            {
-                ContentArea.Children.Add(new Label
-                {
-                    Text = "Activas",
-                    FontSize = 18,
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = GetDynamicColor("TextPrimary"),
-                    Margin = new Thickness(0, 10, 0, 5)
-                });
-
-                foreach (var rv in _activeRentals)
-                {
-                    ContentArea.Children.Add(CreateRentalCard(rv, true));
-                }
-            }
-
-            // Próximas
-            if (_upcomingRentals.Count > 0)
-            {
-                ContentArea.Children.Add(new Label
-                {
-                    Text = "Próximas",
-                    FontSize = 18,
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = GetDynamicColor("TextPrimary"),
-                    Margin = new Thickness(0, 15, 0, 5)
-                });
-
-                foreach (var rv in _upcomingRentals)
-                {
-                    ContentArea.Children.Add(CreateRentalCard(rv, false));
-                }
-            }
-
-            // Historial
-            if (_completedRentals.Count > 0)
-            {
-                ContentArea.Children.Add(new Label
-                {
-                    Text = "Historial",
-                    FontSize = 18,
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = GetDynamicColor("TextPrimary"),
-                    Margin = new Thickness(0, 15, 0, 5)
-                });
-
-                foreach (var rv in _completedRentals)
-                {
-                    ContentArea.Children.Add(CreateCompletedRentalCard(rv));
-                }
-            }
-
-            if (_activeRentals.Count == 0 && _upcomingRentals.Count == 0 && _completedRentals.Count == 0)
-            {
-                ShowEmptyState();
-            }
-        }
-
-        private Frame CreateRentalCard(RentalWithVehicle rv, bool isActive)
+        private Frame CreateRentalCard(ViewModels.RentalWithVehicle rv, bool isActive)
         {
             var vehicle = rv.Vehicle!;
             var rental = rv.Rental;
@@ -341,7 +261,7 @@ namespace AUTORENT
             };
         }
 
-        private Frame CreateCompletedRentalCard(RentalWithVehicle rv)
+        private Frame CreateCompletedRentalCard(ViewModels.RentalWithVehicle rv)
         {
             var vehicle = rv.Vehicle!;
             var rental = rv.Rental;
@@ -437,11 +357,5 @@ namespace AUTORENT
             }
             return Colors.Black; // Fallback
         }
-    }
-
-    public class RentalWithVehicle
-    {
-        public Rental Rental { get; set; } = null!;
-        public Vehicle? Vehicle { get; set; }
     }
 }

@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:AUTORENT.ViewModels"
+             xmlns:converters="clr-namespace:AUTORENT.Converters"
              x:Class="AUTORENT.RegisterPage"
+             x:DataType="viewmodels:RegisterViewModel"
              Title="Crear Cuenta"
              BackgroundColor="#F5F5F5">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <ScrollView>
         <VerticalStackLayout Padding="30" Spacing="20">
@@ -30,7 +39,7 @@
                    Padding="0" 
                    HasShadow="False"
                    BorderColor="#E0E0E0">
-                <Entry x:Name="NameEntry"
+                <Entry Text="{Binding Name}"
                        Placeholder="Nombre completo"
                        PlaceholderColor="#999"
                        TextColor="#333"
@@ -43,7 +52,7 @@
                    Padding="0" 
                    HasShadow="False"
                    BorderColor="#E0E0E0">
-                <Entry x:Name="EmailEntry"
+                <Entry Text="{Binding Email}"
                        Placeholder="Correo electrónico"
                        Keyboard="Email"
                        PlaceholderColor="#999"
@@ -57,7 +66,7 @@
                    Padding="0" 
                    HasShadow="False"
                    BorderColor="#E0E0E0">
-                <Entry x:Name="PhoneEntry"
+                <Entry Text="{Binding Phone}"
                        Placeholder="Teléfono"
                        Keyboard="Telephone"
                        PlaceholderColor="#999"
@@ -72,21 +81,20 @@
                    HasShadow="False"
                    BorderColor="#E0E0E0">
                 <Grid ColumnDefinitions="*,Auto" Margin="15,10">
-                    <Entry x:Name="PasswordEntry"
-                           Grid.Column="0"
+                    <Entry Grid.Column="0"
+                           Text="{Binding Password}"
                            Placeholder="Contraseña"
-                           IsPassword="True"
+                           IsPassword="{Binding IsPasswordVisible, Converter={StaticResource InvertedBoolConverter}}"
                            PlaceholderColor="#999"
                            TextColor="#333"
                            FontSize="16"/>
                     <Button Grid.Column="1"
-                            x:Name="TogglePasswordButton"
-                            Text="👁"
+                            Text="{Binding PasswordToggleIcon}"
+                            Command="{Binding TogglePasswordCommand}"
                             FontSize="20"
                             BackgroundColor="Transparent"
                             TextColor="#666"
-                            Padding="10,0"
-                            Clicked="OnTogglePasswordClicked"/>
+                            Padding="10,0"/>
                 </Grid>
             </Frame>
 
@@ -96,21 +104,20 @@
                    HasShadow="False"
                    BorderColor="#E0E0E0">
                 <Grid ColumnDefinitions="*,Auto" Margin="15,10">
-                    <Entry x:Name="ConfirmPasswordEntry"
-                           Grid.Column="0"
+                    <Entry Grid.Column="0"
+                           Text="{Binding ConfirmPassword}"
                            Placeholder="Confirmar contraseña"
-                           IsPassword="True"
+                           IsPassword="{Binding IsConfirmPasswordVisible, Converter={StaticResource InvertedBoolConverter}}"
                            PlaceholderColor="#999"
                            TextColor="#333"
                            FontSize="16"/>
                     <Button Grid.Column="1"
-                            x:Name="ToggleConfirmPasswordButton"
-                            Text="👁"
+                            Text="{Binding ConfirmPasswordToggleIcon}"
+                            Command="{Binding ToggleConfirmPasswordCommand}"
                             FontSize="20"
                             BackgroundColor="Transparent"
                             TextColor="#666"
-                            Padding="10,0"
-                            Clicked="OnToggleConfirmPasswordClicked"/>
+                            Padding="10,0"/>
                 </Grid>
             </Frame>
 
@@ -125,7 +132,7 @@
                    Padding="0" 
                    HasShadow="False"
                    BorderColor="#E0E0E0">
-                <Picker x:Name="UserTypePicker"
+                <Picker SelectedIndex="{Binding SelectedUserTypeIndex}"
                         Title="Selecciona tu tipo"
                         TextColor="#333"
                         FontSize="16"
@@ -138,16 +145,15 @@
             </Frame>
 
             <!-- Botón Registrarse -->
-            <Button x:Name="RegisterButton"
-                    Text="Crear Cuenta"
+            <Button Text="Crear Cuenta"
+                    Command="{Binding RegisterCommand}"
                     BackgroundColor="#1565C0"
                     TextColor="White"
                     FontSize="18"
                     FontAttributes="Bold"
                     CornerRadius="10"
                     HeightRequest="55"
-                    Margin="0,20,0,0"
-                    Clicked="OnRegisterClicked"/>
+                    Margin="0,20,0,0"/>
 
             <!-- Ya tienes cuenta -->
             <HorizontalStackLayout HorizontalOptions="Center" 
@@ -161,7 +167,7 @@
                        FontSize="14"
                        FontAttributes="Bold">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnLoginTapped"/>
+                        <TapGestureRecognizer Command="{Binding NavigateToLoginCommand}"/>
                     </Label.GestureRecognizers>
                 </Label>
             </HorizontalStackLayout>

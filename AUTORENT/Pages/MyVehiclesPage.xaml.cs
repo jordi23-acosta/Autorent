@@ -1,118 +1,30 @@
-using AUTORENT.Services;
-using AUTORENT.Models;
-using System.Collections.ObjectModel;
+using AUTORENT.ViewModels;
 
 namespace AUTORENT.Pages
 {
     public partial class MyVehiclesPage : ContentPage
     {
-        private readonly AuthService _authService;
-        private ObservableCollection<Vehicle> _vehicles = new();
+        private readonly MyVehiclesViewModel _viewModel;
 
         public MyVehiclesPage()
         {
             InitializeComponent();
-            _authService = AuthService.Instance;
+            _viewModel = new MyVehiclesViewModel();
+            BindingContext = _viewModel;
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await LoadVehiclesAsync();
-        }
-
-        private async Task LoadVehiclesAsync()
-        {
-            try
-            {
-                var client = _authService.GetClient();
-                if (client == null || _authService.CurrentUser == null)
-                {
-                    await DisplayAlert("Error", "No has iniciado sesión", "OK");
-                    return;
-                }
-
-                var userId = _authService.CurrentUser.Id;
-
-                // Cargar vehículos del propietario
-                var vehiclesResponse = await client
-                    .From<Vehicle>()
-                    .Where(x => x.OwnerId == userId)
-                    .Order(x => x.CreatedAt, Supabase.Postgrest.Constants.Ordering.Descending)
-                    .Get();
-
-                _vehicles.Clear();
-                if (vehiclesResponse?.Models != null)
-                {
-                    foreach (var vehicle in vehiclesResponse.Models)
-                    {
-                        _vehicles.Add(vehicle);
-                    }
-                }
-
-                // Actualizar estadísticas y UI
-                await UpdateStatisticsAsync();
-                BuildVehiclesUI();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error cargando vehículos: {ex.Message}");
-                await DisplayAlert("Error", "No se pudieron cargar los vehículos", "OK");
-            }
-        }
-
-        private async Task UpdateStatisticsAsync()
-        {
-            try
-            {
-                var client = _authService.GetClient();
-                if (client == null || _authService.CurrentUser == null) return;
-
-                var userId = _authService.CurrentUser.Id;
-
-                // Contar rentas activas
-                var activeRentalsResponse = await client
-                    .From<Rental>()
-                    .Where(x => x.OwnerId == userId)
-                    .Filter("status", Supabase.Postgrest.Constants.Operator.In, new[] { "activa", "confirmada" })
-                    .Get();
-
-                var activeCount = activeRentalsResponse?.Models?.Count ?? 0;
-                ActiveCountLabel.Text = activeCount.ToString();
-
-                // Contar solicitudes pendientes
-                var pendingRentalsResponse = await client
-                    .From<Rental>()
-                    .Where(x => x.OwnerId == userId)
-                    .Where(x => x.StatusString == "pendiente")
-                    .Get();
-
-                var pendingCount = pendingRentalsResponse?.Models?.Count ?? 0;
-                RequestsCountLabel.Text = pendingCount.ToString();
-
-                // Calcular ganancias totales
-                var completedRentalsResponse = await client
-                    .From<Rental>()
-                    .Where(x => x.OwnerId == userId)
-                    .Where(x => x.StatusString == "completada")
-                    .Get();
-
-                var totalEarnings = completedRentalsResponse?.Models?.Sum(r => r.TotalPrice) ?? 0;
-                EarningsLabel.Text = totalEarnings >= 1000 
-                    ? $"${totalEarnings / 1000:F1}K" 
-                    : $"${totalEarnings:F0}";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error actualizando estadísticas: {ex.Message}");
-            }
+            await _viewModel.LoadVehiclesAsync();
+            BuildVehiclesUI();
         }
 
         private void BuildVehiclesUI()
         {
             VehiclesContainer.Children.Clear();
 
-            if (_vehicles.Count == 0)
+            if (_viewModel.Vehicles.Count == 0)
             {
                 // Mostrar estado vacío
                 VehiclesContainer.Children.Add(new VerticalStackLayout
@@ -160,13 +72,13 @@ namespace AUTORENT.Pages
             });
 
             // Agregar cada vehículo
-            foreach (var vehicle in _vehicles)
+            foreach (var vehicle in _viewModel.Vehicles)
             {
                 VehiclesContainer.Children.Add(CreateVehicleCard(vehicle));
             }
         }
 
-        private Frame CreateVehicleCard(Vehicle vehicle)
+        private Frame CreateVehicleCard(Models.Vehicle vehicle)
         {
             var grid = new Grid
             {
@@ -188,11 +100,11 @@ namespace AUTORENT.Pages
                 HeightRequest = 80,
                 CornerRadius = 10,
                 Padding = 0,
-                BackgroundColor = GetVehicleBackgroundColor(vehicle.Brand),
+                BackgroundColor = _viewModel.GetVehicleBackgroundColor(vehicle.Brand),
                 HasShadow = false,
                 Content = new Label
                 {
-                    Text = GetVehicleEmoji(vehicle.Brand),
+                    Text = _viewModel.GetVehicleEmoji(vehicle.Brand),
                     FontSize = 40,
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center
@@ -321,34 +233,6 @@ namespace AUTORENT.Pages
                 BackgroundColor = GetDynamicColor("CardBackground"),
                 Padding = new Thickness(15),
                 Content = grid
-            };
-        }
-
-        private string GetVehicleEmoji(string brand)
-        {
-            return brand.ToLower() switch
-            {
-                var b when b.Contains("toyota") => "🚙",
-                var b when b.Contains("honda") => "🚐",
-                var b when b.Contains("bmw") => "🏎️",
-                var b when b.Contains("mercedes") => "🚗",
-                var b when b.Contains("ford") => "🚙",
-                var b when b.Contains("chevrolet") => "🚙",
-                var b when b.Contains("nissan") => "🚗",
-                var b when b.Contains("mazda") => "🚗",
-                _ => "🚗"
-            };
-        }
-
-        private Color GetVehicleBackgroundColor(string brand)
-        {
-            return brand.ToLower() switch
-            {
-                var b when b.Contains("toyota") => Color.FromArgb("#E3F2FD"),
-                var b when b.Contains("honda") => Color.FromArgb("#FFF3E0"),
-                var b when b.Contains("bmw") => Color.FromArgb("#F3E5F5"),
-                var b when b.Contains("mercedes") => Color.FromArgb("#E8F5E9"),
-                _ => Color.FromArgb("#F5F5F5")
             };
         }
 

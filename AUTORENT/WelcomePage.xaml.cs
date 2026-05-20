@@ -1,59 +1,35 @@
-namespace AUTORENT;
+using AUTORENT.ViewModels;
 
-public class OnboardingItem
-{
-    public string ImageSource { get; set; } = "";
-    public string Title { get; set; } = "";
-    public string Description { get; set; } = "";
-}
+namespace AUTORENT;
 
 public partial class WelcomePage : ContentPage
 {
-    private List<OnboardingItem> _items;
-    private System.Threading.Timer? _autoPlayTimer;
-    private int _currentIndex = 0;
+    private readonly WelcomeViewModel _viewModel;
 
     public WelcomePage()
     {
         InitializeComponent();
-
-        _items = new List<OnboardingItem>
-        {
-            new OnboardingItem
-            {
-                ImageSource = "onboarding_1.png",
-                Title = "Encuentra. Reserva. Estaciona.",
-                Description = "Localiza lugares disponibles cerca de ti en tiempo real."
-            },
-            new OnboardingItem
-            {
-                ImageSource = "onboarding_2.png",
-                Title = "Renta tu auto ideal",
-                Description = "Miles de vehículos disponibles con entrega a domicilio."
-            },
-            new OnboardingItem
-            {
-                ImageSource = "onboarding_3.png",
-                Title = "Reserva en segundos",
-                Description = "Proceso rápido y seguro desde tu celular."
-            },
-            new OnboardingItem
-            {
-                ImageSource = "onboarding_4.png",
-                Title = "Gana dinero con tu auto",
-                Description = "Renta tu vehículo y genera ingresos extra de forma segura."
-            }
-        };
+        _viewModel = new WelcomeViewModel();
+        BindingContext = _viewModel;
 
         BuildDots();
-        ShowSlide(0);
-        StartAutoPlay();
+        _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        _viewModel.StartAutoPlay();
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(_viewModel.CurrentIndex))
+        {
+            UpdateDots(_viewModel.CurrentIndex);
+            BackgroundImage.Source = _viewModel.CurrentImageSource;
+        }
     }
 
     private void BuildDots()
     {
         DotsContainer.Children.Clear();
-        for (int i = 0; i < _items.Count; i++)
+        for (int i = 0; i < _viewModel.ItemsCount; i++)
         {
             DotsContainer.Children.Add(new BoxView
             {
@@ -77,45 +53,9 @@ public partial class WelcomePage : ContentPage
         }
     }
 
-    // Sin animación — cambio directo, sin negro
-    private void ShowSlide(int index)
-    {
-        var item = _items[index];
-        BackgroundImage.Source = item.ImageSource;
-        TitleLabel.Text = item.Title;
-        DescriptionLabel.Text = item.Description;
-        UpdateDots(index);
-    }
-
-    private void StartAutoPlay()
-    {
-        _autoPlayTimer = new System.Threading.Timer((state) =>
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                _currentIndex = (_currentIndex + 1) % _items.Count;
-                ShowSlide(_currentIndex);
-            });
-        }, null, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(4));
-    }
-
-    private async void OnLoginClicked(object sender, EventArgs e)
-    {
-        _autoPlayTimer?.Dispose();
-        Preferences.Set("HasSeenOnboarding", true);
-        await Navigation.PushAsync(new LoginPage());
-    }
-
-    private async void OnRegisterClicked(object sender, EventArgs e)
-    {
-        _autoPlayTimer?.Dispose();
-        Preferences.Set("HasSeenOnboarding", true);
-        await Navigation.PushAsync(new LoginPage());
-    }
-
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        _autoPlayTimer?.Dispose();
+        _viewModel.StopAutoPlay();
     }
 }

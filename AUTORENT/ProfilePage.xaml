@@ -143,7 +143,7 @@
                     
                     <Grid Padding="20" ColumnDefinitions="Auto,*,Auto">
                         <Grid.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnPersonalInfoClicked"/>
+                            <TapGestureRecognizer Command="{Binding PersonalInfoCommand}"/>
                         </Grid.GestureRecognizers>
                         <Label Grid.Column="0" Text="👤" FontSize="24" VerticalOptions="Center"/>
                         <Label x:Name="PersonalInfoLabel"
@@ -182,9 +182,8 @@
                                Margin="15,0,0,0"/>
                         <Switch x:Name="DarkModeSwitch" 
                                 Grid.Column="2" 
-                                IsToggled="False" 
-                                VerticalOptions="Center"
-                                Toggled="OnDarkModeToggled"/>
+                                IsToggled="{Binding IsDarkMode}" 
+                                VerticalOptions="Center"/>
                     </Grid>
 
                 </VerticalStackLayout>
@@ -192,6 +191,7 @@
 
             <!-- Botón de cerrar sesión -->
             <Button Text="Cerrar Sesión"
+                    Command="{Binding LogoutCommand}"
                     BackgroundColor="Transparent"
                     TextColor="#F44336"
                     FontAttributes="Bold"
@@ -199,8 +199,7 @@
                     BorderColor="#F44336"
                     BorderWidth="2"
                     CornerRadius="10"
-                    HeightRequest="50"
-                    Clicked="OnLogoutClicked"/>
+                    HeightRequest="50"/>
 
         </VerticalStackLayout>
     </ScrollView>

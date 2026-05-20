@@ -1,63 +1,30 @@
-﻿using AUTORENT.Services;
+﻿using AUTORENT.ViewModels;
 using AUTORENT.Models;
-using System.Collections.ObjectModel;
 
 namespace AUTORENT
 {
     public partial class MainPage : ContentPage
     {
-        private readonly AuthService _authService;
-        private ObservableCollection<Vehicle> _availableVehicles = new();
+        private MainViewModel ViewModel => (MainViewModel)BindingContext;
 
         public MainPage()
         {
             InitializeComponent();
-            _authService = AuthService.Instance;
+            BindingContext = new MainViewModel();
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await LoadAvailableVehiclesAsync();
-        }
-
-        private async Task LoadAvailableVehiclesAsync()
-        {
-            try
-            {
-                var client = _authService.GetClient();
-                if (client == null) return;
-
-                // Cargar vehículos disponibles (máximo 10 para la página de inicio)
-                var vehiclesResponse = await client
-                    .From<Vehicle>()
-                    .Where(x => x.IsAvailable == true)
-                    .Order(x => x.CreatedAt, Supabase.Postgrest.Constants.Ordering.Descending)
-                    .Limit(10)
-                    .Get();
-
-                _availableVehicles.Clear();
-                if (vehiclesResponse?.Models != null)
-                {
-                    foreach (var vehicle in vehiclesResponse.Models)
-                    {
-                        _availableVehicles.Add(vehicle);
-                    }
-                }
-
-                BuildVehiclesUI();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error cargando vehículos: {ex.Message}");
-            }
+            await ViewModel.LoadAvailableVehiclesAsync();
+            BuildVehiclesUI();
         }
 
         private void BuildVehiclesUI()
         {
             VehiclesContainer.Children.Clear();
 
-            if (_availableVehicles.Count == 0)
+            if (ViewModel.AvailableVehicles.Count == 0)
             {
                 // Mostrar mensaje si no hay vehículos
                 VehiclesContainer.Children.Add(new Label
@@ -71,7 +38,7 @@ namespace AUTORENT
                 return;
             }
 
-            foreach (var vehicle in _availableVehicles)
+            foreach (var vehicle in ViewModel.AvailableVehicles)
             {
                 VehiclesContainer.Children.Add(CreateVehicleCard(vehicle));
             }
@@ -102,7 +69,7 @@ namespace AUTORENT
                 HasShadow = false,
                 Content = new Label
                 {
-                    Text = GetVehicleEmoji(vehicle.Brand),
+                    Text = ViewModel.GetVehicleEmoji(vehicle.Brand),
                     FontSize = 35,
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center
@@ -185,30 +152,21 @@ namespace AUTORENT
             };
         }
 
-        private string GetVehicleEmoji(string brand)
-        {
-            return brand.ToLower() switch
-            {
-                var b when b.Contains("toyota") => "🚙",
-                var b when b.Contains("honda") => "🚐",
-                var b when b.Contains("bmw") => "🏎️",
-                var b when b.Contains("mercedes") => "🚗",
-                var b when b.Contains("ford") => "🚙",
-                var b when b.Contains("chevrolet") => "🚙",
-                var b when b.Contains("nissan") => "🚗",
-                var b when b.Contains("mazda") => "🚗",
-                _ => "🚗"
-            };
-        }
-
         private async void OnSearchClicked(object? sender, EventArgs e)
         {
-            await DisplayAlert("Búsqueda", "Función de búsqueda en desarrollo", "OK");
+            if (ViewModel.SearchCommand is AsyncRelayCommand asyncCommand)
+            {
+                await asyncCommand.ExecuteAsync(null);
+            }
         }
 
         private async void OnRefreshClicked(object? sender, EventArgs e)
         {
-            await LoadAvailableVehiclesAsync();
+            if (ViewModel.RefreshCommand is AsyncRelayCommand asyncCommand)
+            {
+                await asyncCommand.ExecuteAsync(null);
+                BuildVehiclesUI();
+            }
         }
     }
 }
