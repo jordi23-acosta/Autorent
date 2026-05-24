@@ -125,12 +125,13 @@ namespace AUTORENT.Services
 
                 System.Diagnostics.Debug.WriteLine($"[REGISTRO] Iniciando registro para: {email}");
 
-                // Crear usuario en Supabase Auth
+                // Crear usuario en Supabase Auth con todos los datos
                 var options = new Supabase.Gotrue.SignUpOptions
                 {
                     Data = new Dictionary<string, object>
                     {
                         { "full_name", fullName },
+                        { "phone", phone },
                         { "user_type", userType }
                     }
                 };
