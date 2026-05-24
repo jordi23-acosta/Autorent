@@ -1,32 +1,596 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:AUTORENT.ViewModels"
+             xmlns:converters="clr-namespace:AUTORENT.Converters"
              x:Class="AUTORENT.RentalsPage"
-             Title="Mis Rentas"
-             BackgroundColor="{DynamicResource PageBackground}">
+             x:DataType="viewmodels:RentalsViewModel"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F8F9FA">
 
-    <Grid RowDefinitions="Auto,*" Padding="0">
-        
-        <!-- Header -->
-        <BoxView Grid.Row="0" HeightRequest="120" BackgroundColor="{StaticResource Primary}"/>
-        <VerticalStackLayout Grid.Row="0" Padding="20" VerticalOptions="Center">
-            <Label Text="Mis Rentas" 
-                   FontSize="28" 
-                   FontAttributes="Bold"
-                   TextColor="White"/>
-            <Label Text="Gestiona tus reservaciones" 
-                   FontSize="14"
-                   TextColor="{StaticResource PrimaryDarkText}"
-                   Margin="0,5,0,0"/>
-        </VerticalStackLayout>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
 
-        <!-- Content -->
-        <ScrollView Grid.Row="1" Margin="0,-20,0,0">
-            <VerticalStackLayout x:Name="ContentArea" Spacing="15" Padding="20">
-                <!-- Las rentas se cargarán dinámicamente aquí -->
+            <!-- Template para card de renta -->
+            <DataTemplate x:Key="RentalCardTemplate" x:DataType="viewmodels:RentalWithVehicle">
+                <Border StrokeThickness="0"
+                        Padding="0"
+                        BackgroundColor="White"
+                        Margin="0,0,0,12">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16"/>
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="Black" 
+                                Opacity="0.1" 
+                                Radius="10" 
+                                Offset="0,3"/>
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="0">
+
+                        <!-- Header del card: vehículo + estado -->
+                        <Grid Padding="15"
+                              ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="14">
+
+                            <!-- Icono del vehículo -->
+                            <Border Grid.Column="0"
+                                    WidthRequest="60"
+                                    HeightRequest="60"
+                                    StrokeThickness="0"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14"/>
+                                </Border.StrokeShape>
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#E3F2FD" Offset="0.0"/>
+                                        <GradientStop Color="#BBDEFB" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Label Text="🚗"
+                                       FontSize="30"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Border>
+
+                            <!-- Información del vehículo -->
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="3"
+                                                 VerticalOptions="Center">
+                                <Label Text="{Binding VehicleBrand}"
+                                       FontSize="10"
+                                       TextColor="#9E9E9E"
+                                       FontAttributes="Bold"
+                                       TextTransform="Uppercase"/>
+                                <Label Text="{Binding VehicleName}"
+                                       FontSize="15"
+                                       FontAttributes="Bold"
+                                       TextColor="#212121"
+                                       LineBreakMode="TailTruncation"/>
+                                <HorizontalStackLayout Spacing="10" Margin="0,2,0,0">
+                                    <HorizontalStackLayout Spacing="3">
+                                        <Label Text="👥" FontSize="11"/>
+                                        <Label Text="{Binding VehicleSeats}" 
+                                               FontSize="11" 
+                                               TextColor="#616161"/>
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout Spacing="3">
+                                        <Label Text="⚙️" FontSize="11"/>
+                                        <Label Text="{Binding VehicleTransmission}" 
+                                               FontSize="11" 
+                                               TextColor="#616161"/>
+                                    </HorizontalStackLayout>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Badge de estado -->
+                            <Border Grid.Column="2"
+                                    StrokeThickness="0"
+                                    Padding="10,5"
+                                    VerticalOptions="Start"
+                                    BackgroundColor="{Binding StatusBadgeColor}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Label Text="{Binding StatusBadgeText}"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="{Binding StatusBadgeTextColor}"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Divider -->
+                        <BoxView HeightRequest="1" 
+                                 BackgroundColor="#F5F5F5"
+                                 Margin="15,0"/>
+
+                        <!-- Fechas -->
+                        <Grid Padding="15,12"
+                              ColumnDefinitions="*,Auto,*"
+                              ColumnSpacing="10">
+
+                            <!-- Recogida -->
+                            <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="📅" FontSize="11"/>
+                                    <Label Text="Recogida" 
+                                           FontSize="10"
+                                           TextColor="#9E9E9E"
+                                           FontAttributes="Bold"
+                                           TextTransform="Uppercase"/>
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding StartDateFormatted}"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#212121"/>
+                                <Label Text="{Binding StartTimeFormatted}"
+                                       FontSize="11"
+                                       TextColor="#1E88E5"/>
+                            </VerticalStackLayout>
+
+                            <!-- Flecha -->
+                            <Label Grid.Column="1" 
+                                   Text="→" 
+                                   FontSize="20"
+                                   TextColor="#BDBDBD"
+                                   VerticalOptions="Center"/>
+
+                            <!-- Devolución -->
+                            <VerticalStackLayout Grid.Column="2" Spacing="3">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="📍" FontSize="11"/>
+                                    <Label Text="Devolución" 
+                                           FontSize="10"
+                                           TextColor="#9E9E9E"
+                                           FontAttributes="Bold"
+                                           TextTransform="Uppercase"/>
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding EndDateFormatted}"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#212121"/>
+                                <Label Text="{Binding EndTimeFormatted}"
+                                       FontSize="11"
+                                       TextColor="#1E88E5"/>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Footer: días, total y acciones -->
+                        <Grid BackgroundColor="#FAFAFA"
+                              Padding="15,12"
+                              ColumnDefinitions="*,*,Auto"
+                              ColumnSpacing="8">
+
+                            <!-- Días -->
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="DÍAS" 
+                                       FontSize="10"
+                                       TextColor="#9E9E9E"
+                                       FontAttributes="Bold"/>
+                                <HorizontalStackLayout Spacing="3">
+                                    <Label Text="{Binding TotalDays}" 
+                                           FontSize="16" 
+                                           FontAttributes="Bold"
+                                           TextColor="#1E88E5"/>
+                                    <Label Text="días" 
+                                           FontSize="11" 
+                                           TextColor="#757575"
+                                           VerticalOptions="End"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Total -->
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="TOTAL" 
+                                       FontSize="10"
+                                       TextColor="#9E9E9E"
+                                       FontAttributes="Bold"/>
+                                <Label Text="{Binding TotalPriceFormatted}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#4CAF50"/>
+                            </VerticalStackLayout>
+
+                            <!-- Botón Cancelar -->
+                            <Border Grid.Column="2"
+                                    StrokeThickness="1.5"
+                                    Stroke="#F44336"
+                                    BackgroundColor="Transparent"
+                                    Padding="12,6"
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding CanCancel}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:RentalsViewModel}}, Path=CancelRentalCommand}" 
+                                                          CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="Cancelar" 
+                                       FontSize="11"
+                                       FontAttributes="Bold"
+                                       TextColor="#F44336"
+                                       VerticalOptions="Center"/>
+                            </Border>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}"
+                 Command="{Binding RefreshCommand}"
+                 RefreshColor="#1E88E5">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Header con gradiente -->
+                <Grid HeightRequest="200">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#1E88E5" Offset="0.0" />
+                            <GradientStop Color="#1565C0" Offset="0.5" />
+                            <GradientStop Color="#0D47A1" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
+
+                    <!-- Círculos decorativos -->
+                    <Ellipse Fill="#FFFFFF" 
+                             Opacity="0.1"
+                             WidthRequest="180" 
+                             HeightRequest="180"
+                             HorizontalOptions="End"
+                             VerticalOptions="Start"
+                             Margin="0,-40,-40,0"/>
+                    <Ellipse Fill="#FFFFFF" 
+                             Opacity="0.08"
+                             WidthRequest="120" 
+                             HeightRequest="120"
+                             HorizontalOptions="Start"
+                             VerticalOptions="End"
+                             Margin="-20,0,0,-20"/>
+
+                    <VerticalStackLayout Padding="25,50,25,20" Spacing="6">
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <Label Text="📋" FontSize="22"/>
+                            <Label Text="Mis Reservaciones" 
+                                   FontSize="14"
+                                   TextColor="#E3F2FD"
+                                   VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <Label Text="Mis Rentas" 
+                               FontSize="28" 
+                               FontAttributes="Bold"
+                               TextColor="White"/>
+                        <Label FontSize="14"
+                               TextColor="#E3F2FD">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Tienes "/>
+                                    <Span Text="{Binding TotalRentals}" FontAttributes="Bold" TextColor="White"/>
+                                    <Span Text=" "/>
+                                    <Span Text="renta(s) en total"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Tarjetas de Estadísticas -->
+                <Grid ColumnDefinitions="*,*,*,*" 
+                      ColumnSpacing="8"
+                      Margin="20,-40,20,15"
+                      HeightRequest="95">
+
+                    <!-- Activas -->
+                    <Border Grid.Column="0"
+                            StrokeThickness="0"
+                            BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="Black" 
+                                    Opacity="0.12" 
+                                    Radius="10" 
+                                    Offset="0,3"/>
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="2" 
+                                             VerticalOptions="Center"
+                                             Padding="6">
+                            <Label Text="🟢" 
+                                   FontSize="16"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="{Binding ActiveCount}" 
+                                   FontSize="20" 
+                                   FontAttributes="Bold"
+                                   TextColor="#388E3C"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Activas" 
+                                   FontSize="10"
+                                   TextColor="#757575"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Próximas -->
+                    <Border Grid.Column="1"
+                            StrokeThickness="0"
+                            BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="Black" 
+                                    Opacity="0.12" 
+                                    Radius="10" 
+                                    Offset="0,3"/>
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="2" 
+                                             VerticalOptions="Center"
+                                             Padding="6">
+                            <Label Text="📅" 
+                                   FontSize="16"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="{Binding UpcomingCount}" 
+                                   FontSize="20" 
+                                   FontAttributes="Bold"
+                                   TextColor="#1E88E5"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Próximas" 
+                                   FontSize="10"
+                                   TextColor="#757575"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Pendientes -->
+                    <Border Grid.Column="2"
+                            StrokeThickness="0"
+                            BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="Black" 
+                                    Opacity="0.12" 
+                                    Radius="10" 
+                                    Offset="0,3"/>
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="2" 
+                                             VerticalOptions="Center"
+                                             Padding="6">
+                            <Label Text="⏳" 
+                                   FontSize="16"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="{Binding PendingCount}" 
+                                   FontSize="20" 
+                                   FontAttributes="Bold"
+                                   TextColor="#F57C00"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Pendientes" 
+                                   FontSize="10"
+                                   TextColor="#757575"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Completadas -->
+                    <Border Grid.Column="3"
+                            StrokeThickness="0"
+                            BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="Black" 
+                                    Opacity="0.12" 
+                                    Radius="10" 
+                                    Offset="0,3"/>
+                        </Border.Shadow>
+                        <VerticalStackLayout Spacing="2" 
+                                             VerticalOptions="Center"
+                                             Padding="6">
+                            <Label Text="✓" 
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#1976D2"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="{Binding CompletedCount}" 
+                                   FontSize="20" 
+                                   FontAttributes="Bold"
+                                   TextColor="#1976D2"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Historial" 
+                                   FontSize="10"
+                                   TextColor="#757575"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Sección: Activas -->
+                <VerticalStackLayout IsVisible="{Binding HasActiveRentals}" 
+                                     Margin="20,10,20,0"
+                                     Spacing="10">
+                    <HorizontalStackLayout Spacing="8" Margin="0,0,0,5">
+                        <Label Text="🟢" FontSize="14" VerticalOptions="Center"/>
+                        <Label Text="ACTIVAS" 
+                               FontSize="12" 
+                               FontAttributes="Bold"
+                               TextColor="#388E3C"
+                               CharacterSpacing="2"
+                               VerticalOptions="Center"/>
+                        <Border StrokeThickness="0"
+                                BackgroundColor="#E8F5E9"
+                                Padding="6,2"
+                                VerticalOptions="Center">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding ActiveCount}" 
+                                   FontSize="10"
+                                   FontAttributes="Bold"
+                                   TextColor="#388E3C"/>
+                        </Border>
+                    </HorizontalStackLayout>
+                    
+                    <CollectionView ItemsSource="{Binding ActiveRentals}"
+                                    ItemTemplate="{StaticResource RentalCardTemplate}"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="0"/>
+                        </CollectionView.ItemsLayout>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Sección: Pendientes -->
+                <VerticalStackLayout IsVisible="{Binding HasPendingRentals}" 
+                                     Margin="20,15,20,0"
+                                     Spacing="10">
+                    <HorizontalStackLayout Spacing="8" Margin="0,0,0,5">
+                        <Label Text="⏳" FontSize="14" VerticalOptions="Center"/>
+                        <Label Text="PENDIENTES DE APROBACIÓN" 
+                               FontSize="12" 
+                               FontAttributes="Bold"
+                               TextColor="#F57C00"
+                               CharacterSpacing="2"
+                               VerticalOptions="Center"/>
+                        <Border StrokeThickness="0"
+                                BackgroundColor="#FFF3E0"
+                                Padding="6,2"
+                                VerticalOptions="Center">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding PendingCount}" 
+                                   FontSize="10"
+                                   FontAttributes="Bold"
+                                   TextColor="#F57C00"/>
+                        </Border>
+                    </HorizontalStackLayout>
+                    
+                    <CollectionView ItemsSource="{Binding PendingRentals}"
+                                    ItemTemplate="{StaticResource RentalCardTemplate}"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="0"/>
+                        </CollectionView.ItemsLayout>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Sección: Próximas -->
+                <VerticalStackLayout IsVisible="{Binding HasUpcomingRentals}" 
+                                     Margin="20,15,20,0"
+                                     Spacing="10">
+                    <HorizontalStackLayout Spacing="8" Margin="0,0,0,5">
+                        <Label Text="📅" FontSize="14" VerticalOptions="Center"/>
+                        <Label Text="PRÓXIMAS" 
+                               FontSize="12" 
+                               FontAttributes="Bold"
+                               TextColor="#1E88E5"
+                               CharacterSpacing="2"
+                               VerticalOptions="Center"/>
+                        <Border StrokeThickness="0"
+                                BackgroundColor="#E3F2FD"
+                                Padding="6,2"
+                                VerticalOptions="Center">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding UpcomingCount}" 
+                                   FontSize="10"
+                                   FontAttributes="Bold"
+                                   TextColor="#1E88E5"/>
+                        </Border>
+                    </HorizontalStackLayout>
+                    
+                    <CollectionView ItemsSource="{Binding UpcomingRentals}"
+                                    ItemTemplate="{StaticResource RentalCardTemplate}"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="0"/>
+                        </CollectionView.ItemsLayout>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Sección: Historial -->
+                <VerticalStackLayout IsVisible="{Binding HasCompletedRentals}" 
+                                     Margin="20,15,20,0"
+                                     Spacing="10">
+                    <HorizontalStackLayout Spacing="8" Margin="0,0,0,5">
+                        <Label Text="✓" FontSize="14" 
+                               FontAttributes="Bold"
+                               TextColor="#1976D2"
+                               VerticalOptions="Center"/>
+                        <Label Text="HISTORIAL" 
+                               FontSize="12" 
+                               FontAttributes="Bold"
+                               TextColor="#1976D2"
+                               CharacterSpacing="2"
+                               VerticalOptions="Center"/>
+                        <Border StrokeThickness="0"
+                                BackgroundColor="#E3F2FD"
+                                Padding="6,2"
+                                VerticalOptions="Center">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding CompletedCount}" 
+                                   FontSize="10"
+                                   FontAttributes="Bold"
+                                   TextColor="#1976D2"/>
+                        </Border>
+                    </HorizontalStackLayout>
+                    
+                    <CollectionView ItemsSource="{Binding CompletedRentals}"
+                                    ItemTemplate="{StaticResource RentalCardTemplate}"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="0"/>
+                        </CollectionView.ItemsLayout>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Estado vacío -->
+                <VerticalStackLayout IsVisible="{Binding HasRentals, Converter={StaticResource InvertedBoolConverter}}"
+                                     Padding="30,40"
+                                     Spacing="15"
+                                     HorizontalOptions="Center">
+                    <Border WidthRequest="100"
+                            HeightRequest="100"
+                            StrokeThickness="0"
+                            BackgroundColor="#E3F2FD"
+                            HorizontalOptions="Center">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="50"/>
+                        </Border.StrokeShape>
+                        <Label Text="📋" 
+                               FontSize="50"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </Border>
+                    <Label Text="Sin rentas todavía" 
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="#212121"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Explora vehículos disponibles y haz tu primera reserva" 
+                           FontSize="13"
+                           TextColor="#757575"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <!-- Espacio inferior -->
+                <BoxView HeightRequest="30" BackgroundColor="Transparent"/>
+
             </VerticalStackLayout>
         </ScrollView>
-
-    </Grid>
+    </RefreshView>
 
 </ContentPage>
