@@ -10,8 +10,15 @@ namespace AUTORENT.ViewModels
         
         private string _userName = string.Empty;
         private string _userEmail = string.Empty;
+        private string _userPhone = string.Empty;
         private string _userRole = string.Empty;
+        private string _userInitials = "?";
+        private string _memberSince = string.Empty;
         private bool _isDarkMode;
+        private bool _isOwner;
+        private int _totalRentals;
+        private int _totalFavorites;
+        private int _totalVehicles;
 
         public ProfileViewModel()
         {
@@ -19,19 +26,31 @@ namespace AUTORENT.ViewModels
             Title = "Perfil";
 
             PersonalInfoCommand = new AsyncRelayCommand(EditPersonalInfoAsync);
+            EditPhoneCommand = new AsyncRelayCommand(EditPhoneAsync);
+            ChangePasswordCommand = new AsyncRelayCommand(ChangePasswordAsync);
             LogoutCommand = new AsyncRelayCommand(LogoutAsync);
+            ToggleThemeCommand = new RelayCommand(ToggleTheme);
+            HelpCommand = new AsyncRelayCommand(ShowHelpAsync);
+            AboutCommand = new AsyncRelayCommand(ShowAboutAsync);
 
             // Suscribirse a cambios de tema
             ThemeService.Instance.ThemeChanged += (s, theme) => OnPropertyChanged(nameof(IsDarkMode));
 
             LoadUserData();
             LoadDarkModePreference();
+            _ = LoadStatsAsync();
         }
 
         public string UserName
         {
             get => _userName;
-            set => SetProperty(ref _userName, value);
+            set
+            {
+                if (SetProperty(ref _userName, value))
+                {
+                    UpdateInitials();
+                }
+            }
         }
 
         public string UserEmail
@@ -40,10 +59,52 @@ namespace AUTORENT.ViewModels
             set => SetProperty(ref _userEmail, value);
         }
 
+        public string UserPhone
+        {
+            get => _userPhone;
+            set => SetProperty(ref _userPhone, value);
+        }
+
         public string UserRole
         {
             get => _userRole;
             set => SetProperty(ref _userRole, value);
+        }
+
+        public string UserInitials
+        {
+            get => _userInitials;
+            set => SetProperty(ref _userInitials, value);
+        }
+
+        public string MemberSince
+        {
+            get => _memberSince;
+            set => SetProperty(ref _memberSince, value);
+        }
+
+        public bool IsOwner
+        {
+            get => _isOwner;
+            set => SetProperty(ref _isOwner, value);
+        }
+
+        public int TotalRentals
+        {
+            get => _totalRentals;
+            set => SetProperty(ref _totalRentals, value);
+        }
+
+        public int TotalFavorites
+        {
+            get => _totalFavorites;
+            set => SetProperty(ref _totalFavorites, value);
+        }
+
+        public int TotalVehicles
+        {
+            get => _totalVehicles;
+            set => SetProperty(ref _totalVehicles, value);
         }
 
         public bool IsDarkMode
@@ -54,14 +115,17 @@ namespace AUTORENT.ViewModels
                 if (SetProperty(ref _isDarkMode, value))
                 {
                     ThemeService.Instance.SetTheme(value);
-                    string message = value ? "Modo oscuro activado" : "Modo claro activado";
-                    Application.Current?.MainPage?.DisplayAlert("Tema", message, "OK");
                 }
             }
         }
 
         public ICommand PersonalInfoCommand { get; }
+        public ICommand EditPhoneCommand { get; }
+        public ICommand ChangePasswordCommand { get; }
         public ICommand LogoutCommand { get; }
+        public ICommand ToggleThemeCommand { get; }
+        public ICommand HelpCommand { get; }
+        public ICommand AboutCommand { get; }
 
         public void LoadUserData()
         {
@@ -70,7 +134,67 @@ namespace AUTORENT.ViewModels
             {
                 UserName = user.Name;
                 UserEmail = user.Email;
-                UserRole = user.Role == Models.UserRole.Driver ? "Conductor" : "Propietario";
+                UserPhone = string.IsNullOrEmpty(user.Phone) ? "Sin teléfono" : user.Phone;
+                IsOwner = user.Role == Models.UserRole.Owner;
+                UserRole = IsOwner ? "Propietario" : "Conductor";
+                MemberSince = $"Miembro desde {user.CreatedAt:MMMM yyyy}";
+                UpdateInitials();
+            }
+        }
+
+        private void UpdateInitials()
+        {
+            if (string.IsNullOrWhiteSpace(_userName))
+            {
+                UserInitials = "?";
+                return;
+            }
+
+            var parts = _userName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2)
+            {
+                UserInitials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+            }
+            else if (parts.Length == 1 && parts[0].Length > 0)
+            {
+                UserInitials = parts[0].Length >= 2 
+                    ? parts[0].Substring(0, 2).ToUpper() 
+                    : parts[0][0].ToString().ToUpper();
+            }
+            else
+            {
+                UserInitials = "?";
+            }
+        }
+
+        private async Task LoadStatsAsync()
+        {
+            try
+            {
+                var client = _authService.GetClient();
+                var user = _authService.CurrentUser;
+                if (client == null || user == null) return;
+
+                // Cargar rentas del usuario
+                var rentalsResponse = await client
+                    .From<Rental>()
+                    .Where(x => x.RenterId == user.Id)
+                    .Get();
+                TotalRentals = rentalsResponse?.Models?.Count ?? 0;
+
+                // Si es propietario, cargar sus vehículos
+                if (IsOwner)
+                {
+                    var vehiclesResponse = await client
+                        .From<Vehicle>()
+                        .Where(x => x.OwnerId == user.Id)
+                        .Get();
+                    TotalVehicles = vehiclesResponse?.Models?.Count ?? 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error cargando estadísticas: {ex.Message}");
             }
         }
 
@@ -80,14 +204,18 @@ namespace AUTORENT.ViewModels
             OnPropertyChanged(nameof(IsDarkMode));
         }
 
+        private void ToggleTheme()
+        {
+            IsDarkMode = !IsDarkMode;
+        }
+
         private async Task EditPersonalInfoAsync()
         {
             var user = _authService.CurrentUser;
             if (user == null) return;
 
-            // Mostrar información personal editable
             string? name = await Application.Current!.MainPage!.DisplayPromptAsync(
-                "Nombre Completo",
+                "✏️ Editar Nombre",
                 "Ingresa tu nombre completo:",
                 initialValue: user.Name,
                 maxLength: 100,
@@ -97,10 +225,10 @@ namespace AUTORENT.ViewModels
             {
                 try
                 {
+                    IsBusy = true;
                     var client = _authService.GetClient();
                     if (client != null)
                     {
-                        // Actualizar en Supabase
                         await client
                             .From<Profile>()
                             .Where(x => x.Id == user.Id)
@@ -108,13 +236,12 @@ namespace AUTORENT.ViewModels
                             .Set(x => x.UpdatedAt, DateTime.UtcNow)
                             .Update();
 
-                        // Actualizar localmente
                         user.Name = name;
                         UserName = name;
 
                         await Application.Current!.MainPage!.DisplayAlert(
-                            "✅ Éxito", 
-                            "Tu información ha sido actualizada", 
+                            "✅ Actualizado", 
+                            "Tu nombre ha sido actualizado", 
                             "OK");
                     }
                 }
@@ -122,11 +249,117 @@ namespace AUTORENT.ViewModels
                 {
                     System.Diagnostics.Debug.WriteLine($"Error actualizando perfil: {ex.Message}");
                     await Application.Current!.MainPage!.DisplayAlert(
-                        "❌ Error", 
-                        "No se pudo actualizar la información", 
+                        "Error", 
+                        ErrorTranslator.TranslateError(ex.Message), 
+                        "OK");
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            }
+        }
+
+        private async Task EditPhoneAsync()
+        {
+            var user = _authService.CurrentUser;
+            if (user == null) return;
+
+            string? phone = await Application.Current!.MainPage!.DisplayPromptAsync(
+                "📱 Editar Teléfono",
+                "Ingresa tu número de teléfono:",
+                initialValue: user.Phone ?? string.Empty,
+                maxLength: 20,
+                keyboard: Microsoft.Maui.Keyboard.Telephone);
+
+            if (!string.IsNullOrWhiteSpace(phone) && phone != user.Phone)
+            {
+                try
+                {
+                    IsBusy = true;
+                    var client = _authService.GetClient();
+                    if (client != null)
+                    {
+                        await client
+                            .From<Profile>()
+                            .Where(x => x.Id == user.Id)
+                            .Set(x => x.Phone!, phone)
+                            .Set(x => x.UpdatedAt, DateTime.UtcNow)
+                            .Update();
+
+                        user.Phone = phone;
+                        UserPhone = phone;
+
+                        await Application.Current!.MainPage!.DisplayAlert(
+                            "✅ Actualizado", 
+                            "Tu teléfono ha sido actualizado", 
+                            "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await Application.Current!.MainPage!.DisplayAlert(
+                        "Error", 
+                        ErrorTranslator.TranslateError(ex.Message), 
+                        "OK");
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            }
+        }
+
+        private async Task ChangePasswordAsync()
+        {
+            await Application.Current!.MainPage!.DisplayAlert(
+                "🔒 Cambiar Contraseña",
+                "Te enviaremos un email con instrucciones para cambiar tu contraseña",
+                "OK");
+
+            try
+            {
+                var user = _authService.CurrentUser;
+                if (user != null)
+                {
+                    IsBusy = true;
+                    var result = await _authService.ResetPasswordAsync(user.Email);
+                    
+                    await Application.Current!.MainPage!.DisplayAlert(
+                        result ? "✅ Email enviado" : "Error",
+                        result 
+                            ? "Revisa tu email para cambiar tu contraseña" 
+                            : "No se pudo enviar el email",
                         "OK");
                 }
             }
+            catch (Exception ex)
+            {
+                await Application.Current!.MainPage!.DisplayAlert(
+                    "Error",
+                    ErrorTranslator.TranslateError(ex.Message),
+                    "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private async Task ShowHelpAsync()
+        {
+            await Application.Current!.MainPage!.DisplayAlert(
+                "💬 Ayuda y Soporte",
+                "Para ayuda contacta:\n\n📧 soporte@autorent.com\n📱 +52 555 123 4567\n\nHorario: Lun-Vie 9am-6pm",
+                "OK");
+        }
+
+        private async Task ShowAboutAsync()
+        {
+            await Application.Current!.MainPage!.DisplayAlert(
+                "ℹ️ Acerca de AUTORENT",
+                "AUTORENT v1.0\n\nLa mejor plataforma para rentar y publicar autos.\n\n© 2026 AUTORENT",
+                "OK");
         }
 
         private async Task LogoutAsync()
@@ -134,8 +367,8 @@ namespace AUTORENT.ViewModels
             bool answer = await Application.Current!.MainPage!.DisplayAlert(
                 "Cerrar Sesión",
                 "¿Estás seguro que deseas cerrar sesión?", 
-                "Sí", 
-                "No");
+                "Sí, cerrar", 
+                "Cancelar");
 
             if (answer)
             {
