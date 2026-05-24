@@ -21,6 +21,8 @@ namespace AUTORENT.ViewModels
         private VehicleCategory _selectedCategory = VehicleCategory.Economic;
         private int _photoCount = 0;
         private readonly string?[] _photoPaths = new string?[3];
+        private string _generalError = string.Empty;
+        private bool _hasGeneralError;
 
         public AddVehicleViewModel()
         {
@@ -32,6 +34,7 @@ namespace AUTORENT.ViewModels
             IncrementSeatsCommand = new RelayCommand(IncrementSeats);
             DecrementSeatsCommand = new RelayCommand(DecrementSeats);
             SelectCategoryCommand = new RelayCommand<string>(SelectCategory);
+            DismissErrorCommand = new RelayCommand(DismissError);
         }
 
         // Properties
@@ -41,7 +44,10 @@ namespace AUTORENT.ViewModels
             set
             {
                 if (SetProperty(ref _brand, value))
+                {
+                    OnPropertyChanged(nameof(IsBrandValid));
                     ((AsyncRelayCommand)PublishCommand).RaiseCanExecuteChanged();
+                }
             }
         }
 
@@ -51,7 +57,10 @@ namespace AUTORENT.ViewModels
             set
             {
                 if (SetProperty(ref _model, value))
+                {
+                    OnPropertyChanged(nameof(IsModelValid));
                     ((AsyncRelayCommand)PublishCommand).RaiseCanExecuteChanged();
+                }
             }
         }
 
@@ -61,7 +70,10 @@ namespace AUTORENT.ViewModels
             set
             {
                 if (SetProperty(ref _year, value))
+                {
+                    OnPropertyChanged(nameof(IsYearValid));
                     ((AsyncRelayCommand)PublishCommand).RaiseCanExecuteChanged();
+                }
             }
         }
 
@@ -71,7 +83,10 @@ namespace AUTORENT.ViewModels
             set
             {
                 if (SetProperty(ref _plates, value))
+                {
+                    OnPropertyChanged(nameof(IsPlatesValid));
                     ((AsyncRelayCommand)PublishCommand).RaiseCanExecuteChanged();
+                }
             }
         }
 
@@ -81,7 +96,10 @@ namespace AUTORENT.ViewModels
             set
             {
                 if (SetProperty(ref _color, value))
+                {
+                    OnPropertyChanged(nameof(IsColorValid));
                     ((AsyncRelayCommand)PublishCommand).RaiseCanExecuteChanged();
+                }
             }
         }
 
@@ -91,7 +109,10 @@ namespace AUTORENT.ViewModels
             set
             {
                 if (SetProperty(ref _price, value))
+                {
+                    OnPropertyChanged(nameof(IsPriceValid));
                     ((AsyncRelayCommand)PublishCommand).RaiseCanExecuteChanged();
+                }
             }
         }
 
@@ -134,9 +155,26 @@ namespace AUTORENT.ViewModels
                 {
                     OnPropertyChanged(nameof(PhotoCountText));
                     OnPropertyChanged(nameof(PhotoCountColor));
+                    OnPropertyChanged(nameof(PhotoProgress));
                     ((AsyncRelayCommand)PublishCommand).RaiseCanExecuteChanged();
                 }
             }
+        }
+
+        public string GeneralError
+        {
+            get => _generalError;
+            set
+            {
+                if (SetProperty(ref _generalError, value))
+                    HasGeneralError = !string.IsNullOrEmpty(value);
+            }
+        }
+
+        public bool HasGeneralError
+        {
+            get => _hasGeneralError;
+            set => SetProperty(ref _hasGeneralError, value);
         }
 
         public string PhotoCountText => $"{PhotoCount} de 3 fotos mínimas";
@@ -144,6 +182,16 @@ namespace AUTORENT.ViewModels
         public Microsoft.Maui.Graphics.Color PhotoCountColor => PhotoCount >= 3 
             ? Microsoft.Maui.Graphics.Color.FromArgb("#4CAF50") 
             : Microsoft.Maui.Graphics.Color.FromArgb("#FF5722");
+
+        public double PhotoProgress => PhotoCount / 3.0;
+
+        // Validation properties for visual feedback
+        public bool IsBrandValid => !string.IsNullOrWhiteSpace(_brand) && _brand.Length >= 2;
+        public bool IsModelValid => !string.IsNullOrWhiteSpace(_model) && _model.Length >= 1;
+        public bool IsYearValid => int.TryParse(_year, out int y) && y >= 1990 && y <= DateTime.Now.Year + 1;
+        public bool IsPlatesValid => !string.IsNullOrWhiteSpace(_plates) && _plates.Length >= 5;
+        public bool IsColorValid => !string.IsNullOrWhiteSpace(_color) && _color.Length >= 3;
+        public bool IsPriceValid => decimal.TryParse(_price, out decimal p) && p > 0;
 
         public string?[] PhotoPaths => _photoPaths;
 
@@ -153,15 +201,16 @@ namespace AUTORENT.ViewModels
         public ICommand IncrementSeatsCommand { get; }
         public ICommand DecrementSeatsCommand { get; }
         public ICommand SelectCategoryCommand { get; }
+        public ICommand DismissErrorCommand { get; }
 
         private bool CanPublish()
         {
-            return !string.IsNullOrWhiteSpace(Brand) &&
-                   !string.IsNullOrWhiteSpace(Model) &&
-                   !string.IsNullOrWhiteSpace(Year) &&
-                   !string.IsNullOrWhiteSpace(Plates) &&
-                   !string.IsNullOrWhiteSpace(Color) &&
-                   !string.IsNullOrWhiteSpace(Price) &&
+            return IsBrandValid &&
+                   IsModelValid &&
+                   IsYearValid &&
+                   IsPlatesValid &&
+                   IsColorValid &&
+                   IsPriceValid &&
                    PhotoCount >= 1 &&
                    !IsBusy;
         }
@@ -170,36 +219,27 @@ namespace AUTORENT.ViewModels
         {
             if (IsBusy) return;
 
-            // Validaciones adicionales
-            if (!int.TryParse(Year, out int year) || year < 1990 || year > DateTime.Now.Year + 1)
-            {
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Año inválido", 
-                    "Ingresa un año entre 1990 y el año actual", 
-                    "OK");
-                return;
-            }
-
-            if (!decimal.TryParse(Price, out decimal price) || price <= 0)
-            {
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Precio inválido", 
-                    "Ingresa un precio mayor a $0", 
-                    "OK");
-                return;
-            }
-
             try
             {
                 IsBusy = true;
+                GeneralError = string.Empty;
+
+                if (!int.TryParse(Year, out int year) || year < 1990 || year > DateTime.Now.Year + 1)
+                {
+                    GeneralError = "El año debe estar entre 1990 y el año actual";
+                    return;
+                }
+
+                if (!decimal.TryParse(Price, out decimal price) || price <= 0)
+                {
+                    GeneralError = "Ingresa un precio mayor a $0";
+                    return;
+                }
 
                 var client = _authService.GetClient();
                 if (client == null)
                 {
-                    await Application.Current!.MainPage!.DisplayAlert(
-                        "Error", 
-                        "No se pudo conectar con el servidor", 
-                        "OK");
+                    GeneralError = "No se pudo conectar con el servidor";
                     return;
                 }
 
@@ -222,27 +262,23 @@ namespace AUTORENT.ViewModels
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] Guardando vehículo: {vehicle.Brand} {vehicle.Model}");
+                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] Guardando: {vehicle.Brand} {vehicle.Model}");
                 
-                // Guardar en Supabase
                 await client.From<Vehicle>().Insert(vehicle);
                 
-                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] ✅ Vehículo guardado exitosamente");
+                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] ✅ Vehículo guardado");
 
                 await Application.Current!.MainPage!.DisplayAlert(
-                    "¡Publicado! 🎉",
+                    "🎉 ¡Publicado!",
                     $"Tu {vehicle.Brand} {vehicle.Model} {vehicle.Year} ya está disponible para rentar.",
-                    "Ver mis autos");
+                    "OK");
 
-                await Shell.Current.GoToAsync("..");
+                await NavigateBackAsync();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] ❌ Error: {ex.Message}");
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Error", 
-                    $"No se pudo publicar el vehículo: {ex.Message}", 
-                    "OK");
+                GeneralError = ErrorTranslator.TranslateError(ex.Message);
             }
             finally
             {
@@ -252,32 +288,61 @@ namespace AUTORENT.ViewModels
 
         private async Task CancelAsync()
         {
-            bool answer = await Application.Current!.MainPage!.DisplayAlert(
-                "¿Cancelar?",
-                "Se perderán los datos ingresados", 
-                "Sí, cancelar", 
-                "Seguir editando");
-            
-            if (answer)
+            // Solo pedir confirmación si hay datos ingresados
+            bool hasData = !string.IsNullOrWhiteSpace(Brand) || 
+                          !string.IsNullOrWhiteSpace(Model) ||
+                          PhotoCount > 0;
+
+            if (hasData)
             {
-                await Shell.Current.GoToAsync("..");
+                bool answer = await Application.Current!.MainPage!.DisplayAlert(
+                    "¿Cancelar?",
+                    "Se perderán los datos ingresados", 
+                    "Sí, cancelar", 
+                    "Seguir editando");
+                
+                if (!answer) return;
+            }
+
+            await NavigateBackAsync();
+        }
+
+        private async Task NavigateBackAsync()
+        {
+            try
+            {
+                if (Application.Current?.MainPage is NavigationPage navPage 
+                    && navPage.Navigation.NavigationStack.Count > 1)
+                {
+                    await navPage.PopAsync();
+                }
+                else if (Application.Current?.MainPage is Shell shell)
+                {
+                    if (shell.CurrentPage?.Navigation != null 
+                        && shell.CurrentPage.Navigation.NavigationStack.Count > 1)
+                    {
+                        await shell.CurrentPage.Navigation.PopAsync();
+                    }
+                    else
+                    {
+                        await shell.GoToAsync("..");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navegando atrás: {ex.Message}");
             }
         }
 
         private void IncrementSeats()
         {
-            if (Seats < 12)
-            {
-                Seats++;
-            }
+            if (Seats < 12) Seats++;
         }
 
         private void DecrementSeats()
         {
-            if (Seats > 2)
-            {
-                Seats--;
-            }
+            if (Seats > 2) Seats--;
         }
 
         public void SelectCategory(string? category)
@@ -301,14 +366,13 @@ namespace AUTORENT.ViewModels
             bool wasEmpty = _photoPaths[slot] == null;
             _photoPaths[slot] = path;
 
-            if (wasEmpty && path != null)
-            {
-                PhotoCount++;
-            }
-            else if (!wasEmpty && path == null)
-            {
-                PhotoCount--;
-            }
+            if (wasEmpty && path != null) PhotoCount++;
+            else if (!wasEmpty && path == null) PhotoCount--;
+        }
+
+        private void DismissError()
+        {
+            GeneralError = string.Empty;
         }
     }
 }
