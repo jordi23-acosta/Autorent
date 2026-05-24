@@ -1,5 +1,6 @@
 using AUTORENT.Services;
 using AUTORENT.Models;
+using AUTORENT.Pages;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -13,7 +14,9 @@ namespace AUTORENT.ViewModels
         private string _activeCount = "0";
         private string _requestsCount = "0";
         private string _earnings = "$0";
+        private string _totalCount = "0";
         private bool _hasVehicles;
+        private string _userName = string.Empty;
 
         public MyVehiclesViewModel()
         {
@@ -26,6 +29,13 @@ namespace AUTORENT.ViewModels
             AddVehicleCommand = new AsyncRelayCommand(NavigateToAddVehicleAsync);
             ViewEarningsCommand = new AsyncRelayCommand(NavigateToEarningsAsync);
             ViewRentalsCommand = new AsyncRelayCommand(NavigateToRentalsAsync);
+            EditVehicleCommand = new AsyncRelayCommand<Vehicle>(EditVehicleAsync);
+            DeleteVehicleCommand = new AsyncRelayCommand<Vehicle>(DeleteVehicleAsync);
+
+            if (_authService.CurrentUser != null)
+            {
+                UserName = _authService.CurrentUser.Name;
+            }
         }
 
         public ObservableCollection<Vehicle> Vehicles
@@ -52,16 +62,30 @@ namespace AUTORENT.ViewModels
             set => SetProperty(ref _earnings, value);
         }
 
+        public string TotalCount
+        {
+            get => _totalCount;
+            set => SetProperty(ref _totalCount, value);
+        }
+
         public bool HasVehicles
         {
             get => _hasVehicles;
             set => SetProperty(ref _hasVehicles, value);
         }
 
+        public string UserName
+        {
+            get => _userName;
+            set => SetProperty(ref _userName, value);
+        }
+
         public ICommand RefreshCommand { get; }
         public ICommand AddVehicleCommand { get; }
         public ICommand ViewEarningsCommand { get; }
         public ICommand ViewRentalsCommand { get; }
+        public ICommand EditVehicleCommand { get; }
+        public ICommand DeleteVehicleCommand { get; }
 
         public async Task LoadVehiclesAsync()
         {
@@ -74,10 +98,6 @@ namespace AUTORENT.ViewModels
                 var client = _authService.GetClient();
                 if (client == null || _authService.CurrentUser == null)
                 {
-                    await Application.Current!.MainPage!.DisplayAlert(
-                        "Error", 
-                        "No has iniciado sesión", 
-                        "OK");
                     return;
                 }
 
@@ -100,17 +120,13 @@ namespace AUTORENT.ViewModels
                 }
 
                 HasVehicles = Vehicles.Count > 0;
+                TotalCount = Vehicles.Count.ToString();
 
-                // Actualizar estadísticas
                 await UpdateStatisticsAsync();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error cargando vehículos: {ex.Message}");
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Error", 
-                    "No se pudieron cargar los vehículos", 
-                    "OK");
             }
             finally
             {
@@ -177,35 +193,135 @@ namespace AUTORENT.ViewModels
                 var b when b.Contains("chevrolet") => "🚙",
                 var b when b.Contains("nissan") => "🚗",
                 var b when b.Contains("mazda") => "🚗",
+                var b when b.Contains("audi") => "🏎️",
                 _ => "🚗"
             };
         }
 
-        public Microsoft.Maui.Graphics.Color GetVehicleBackgroundColor(string brand)
+        public Color GetVehicleBackgroundColor(string brand)
         {
             return brand.ToLower() switch
             {
-                var b when b.Contains("toyota") => Microsoft.Maui.Graphics.Color.FromArgb("#E3F2FD"),
-                var b when b.Contains("honda") => Microsoft.Maui.Graphics.Color.FromArgb("#FFF3E0"),
-                var b when b.Contains("bmw") => Microsoft.Maui.Graphics.Color.FromArgb("#F3E5F5"),
-                var b when b.Contains("mercedes") => Microsoft.Maui.Graphics.Color.FromArgb("#E8F5E9"),
-                _ => Microsoft.Maui.Graphics.Color.FromArgb("#F5F5F5")
+                var b when b.Contains("toyota") => Color.FromArgb("#E3F2FD"),
+                var b when b.Contains("honda") => Color.FromArgb("#FFF3E0"),
+                var b when b.Contains("bmw") => Color.FromArgb("#F3E5F5"),
+                var b when b.Contains("mercedes") => Color.FromArgb("#E8F5E9"),
+                _ => Color.FromArgb("#F5F5F5")
             };
         }
 
         private async Task NavigateToAddVehicleAsync()
         {
-            await Shell.Current.GoToAsync("//AddVehiclePage");
+            try
+            {
+                if (Application.Current?.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PushAsync(new AddVehiclePage());
+                }
+                else if (Application.Current?.MainPage is Shell shell)
+                {
+                    if (shell.CurrentPage?.Navigation != null)
+                    {
+                        await shell.CurrentPage.Navigation.PushAsync(new AddVehiclePage());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navegando a AddVehicle: {ex.Message}");
+            }
         }
 
         private async Task NavigateToEarningsAsync()
         {
-            await Shell.Current.GoToAsync("//OwnerEarningsPage");
+            try
+            {
+                if (Application.Current?.MainPage is Shell shell && shell.CurrentPage?.Navigation != null)
+                {
+                    await shell.CurrentPage.Navigation.PushAsync(new OwnerEarningsPage());
+                }
+                else if (Application.Current?.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PushAsync(new OwnerEarningsPage());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navegando a Earnings: {ex.Message}");
+            }
         }
 
         private async Task NavigateToRentalsAsync()
         {
-            await Shell.Current.GoToAsync("//OwnerRentalsPage");
+            try
+            {
+                if (Application.Current?.MainPage is Shell shell && shell.CurrentPage?.Navigation != null)
+                {
+                    await shell.CurrentPage.Navigation.PushAsync(new OwnerRentalsPage());
+                }
+                else if (Application.Current?.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PushAsync(new OwnerRentalsPage());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navegando a Rentals: {ex.Message}");
+            }
+        }
+
+        private async Task EditVehicleAsync(Vehicle? vehicle)
+        {
+            if (vehicle == null) return;
+            
+            await Application.Current!.MainPage!.DisplayAlert(
+                "✏️ Editar Vehículo",
+                $"Función de edición para {vehicle.DisplayName} en desarrollo",
+                "OK");
+        }
+
+        private async Task DeleteVehicleAsync(Vehicle? vehicle)
+        {
+            if (vehicle == null) return;
+
+            bool confirm = await Application.Current!.MainPage!.DisplayAlert(
+                "⚠️ Eliminar Vehículo",
+                $"¿Estás seguro de eliminar {vehicle.DisplayName}?\n\nEsta acción no se puede deshacer.",
+                "Sí, eliminar",
+                "Cancelar");
+
+            if (!confirm) return;
+
+            try
+            {
+                IsBusy = true;
+                var client = _authService.GetClient();
+                if (client == null) return;
+
+                await client.From<Vehicle>()
+                    .Where(x => x.Id == vehicle.Id)
+                    .Delete();
+
+                Vehicles.Remove(vehicle);
+                HasVehicles = Vehicles.Count > 0;
+                TotalCount = Vehicles.Count.ToString();
+
+                await Application.Current!.MainPage!.DisplayAlert(
+                    "✅ Eliminado",
+                    "El vehículo ha sido eliminado",
+                    "OK");
+            }
+            catch (Exception ex)
+            {
+                await Application.Current!.MainPage!.DisplayAlert(
+                    "Error",
+                    ErrorTranslator.TranslateError(ex.Message),
+                    "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
     }
 }

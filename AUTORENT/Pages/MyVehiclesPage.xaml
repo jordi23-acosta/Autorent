@@ -2,111 +2,594 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:AUTORENT.ViewModels"
+             xmlns:converters="clr-namespace:AUTORENT.Converters"
+             xmlns:models="clr-namespace:AUTORENT.Models"
              x:Class="AUTORENT.Pages.MyVehiclesPage"
              x:DataType="viewmodels:MyVehiclesViewModel"
-             Title="Mis Vehículos"
-             BackgroundColor="{DynamicResource PageBackground}">
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F8F9FA">
 
-    <Grid RowDefinitions="Auto,*" Padding="0">
-        
-        <!-- Header -->
-        <BoxView Grid.Row="0" HeightRequest="120" BackgroundColor="{StaticResource Primary}"/>
-        <VerticalStackLayout Grid.Row="0" Padding="20" VerticalOptions="Center">
-            <Label Text="Mis Vehículos" 
-                   FontSize="28" 
-                   FontAttributes="Bold"
-                   TextColor="White"/>
-            <Label Text="Administra tu flota" 
-                   FontSize="14"
-                   TextColor="{StaticResource PrimaryDarkText}"
-                   Margin="0,5,0,0"/>
-        </VerticalStackLayout>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-        <!-- Content -->
-        <ScrollView Grid.Row="1" Margin="0,-20,0,0">
-            <VerticalStackLayout Spacing="15" Padding="20">
+    <Grid RowDefinitions="*,Auto">
 
-                <!-- Botón Agregar Vehículo -->
-                <Button Text="+ Agregar Nuevo Vehículo"
-                        BackgroundColor="#4CAF50"
-                        TextColor="White"
-                        CornerRadius="15"
-                        HeightRequest="60"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        Clicked="OnAddVehicleClicked"/>
+        <RefreshView Grid.Row="0"
+                     IsRefreshing="{Binding IsBusy}"
+                     Command="{Binding RefreshCommand}"
+                     RefreshColor="#1E88E5">
+            <ScrollView>
+                <VerticalStackLayout Spacing="0">
 
-                <!-- Estadísticas -->
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                    <Frame Grid.Column="0" 
-                           CornerRadius="15" 
-                           BackgroundColor="{DynamicResource CardBackground}"
-                           HasShadow="True"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnEarningsClicked"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout Spacing="5">
-                            <Label x:Name="EarningsLabel"
-                                   Text="{Binding Earnings}" 
-                                   FontSize="20" 
+                    <!-- Header con gradiente -->
+                    <Grid HeightRequest="200">
+                        <Grid.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#1E88E5" Offset="0.0" />
+                                <GradientStop Color="#1565C0" Offset="0.5" />
+                                <GradientStop Color="#0D47A1" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Grid.Background>
+
+                        <!-- Círculos decorativos -->
+                        <Ellipse Fill="#FFFFFF" 
+                                 Opacity="0.1"
+                                 WidthRequest="180" 
+                                 HeightRequest="180"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="Start"
+                                 Margin="0,-40,-40,0"/>
+                        <Ellipse Fill="#FFFFFF" 
+                                 Opacity="0.08"
+                                 WidthRequest="120" 
+                                 HeightRequest="120"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="End"
+                                 Margin="-20,0,0,-20"/>
+
+                        <VerticalStackLayout Padding="25,50,25,20" Spacing="6">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="🏠" FontSize="22"/>
+                                <Label Text="Panel de Propietario" 
+                                       FontSize="14"
+                                       TextColor="#E3F2FD"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                            <Label Text="Mis Vehículos" 
+                                   FontSize="28" 
                                    FontAttributes="Bold"
-                                   TextColor="#4CAF50"
-                                   HorizontalOptions="Center"/>
-                            <Label Text="Ganancias" 
-                                   FontSize="10"
-                                   TextColor="{DynamicResource TextSecondary}"
-                                   HorizontalOptions="Center"/>
+                                   TextColor="White"/>
+                            <Label FontSize="14"
+                                   TextColor="#E3F2FD">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Tienes "/>
+                                        <Span Text="{Binding TotalCount}" FontAttributes="Bold" TextColor="White"/>
+                                        <Span Text=" "/>
+                                        <Span Text="vehículo(s) registrado(s)"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
                         </VerticalStackLayout>
-                    </Frame>
+                    </Grid>
 
-                    <Frame Grid.Column="1" 
-                           CornerRadius="15" 
-                           BackgroundColor="{DynamicResource CardBackground}"
-                           HasShadow="True"
-                           Padding="15">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnRentalsClicked"/>
-                        </Frame.GestureRecognizers>
-                        <VerticalStackLayout Spacing="5">
-                            <Label x:Name="RequestsCountLabel"
-                                   Text="{Binding RequestsCount}" 
-                                   FontSize="20" 
-                                   FontAttributes="Bold"
-                                   TextColor="#FF9800"
-                                   HorizontalOptions="Center"/>
-                            <Label Text="Solicitudes" 
-                                   FontSize="10"
-                                   TextColor="{DynamicResource TextSecondary}"
-                                   HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                    <!-- Estadísticas (3 cards flotantes) -->
+                    <Grid ColumnDefinitions="*,*,*" 
+                          ColumnSpacing="10"
+                          Margin="20,-40,20,15"
+                          HeightRequest="110">
 
-                    <Frame Grid.Column="2" 
-                           CornerRadius="15" 
-                           BackgroundColor="{DynamicResource CardBackground}"
-                           HasShadow="True"
-                           Padding="15">
-                        <VerticalStackLayout Spacing="5">
-                            <Label x:Name="ActiveCountLabel"
-                                   Text="{Binding ActiveCount}" 
-                                   FontSize="20" 
-                                   FontAttributes="Bold"
-                                   TextColor="{StaticResource Primary}"
-                                   HorizontalOptions="Center"/>
-                            <Label Text="Activos" 
-                                   FontSize="10"
-                                   TextColor="{DynamicResource TextSecondary}"
-                                   HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </Grid>
+                        <!-- Stat 1: Ganancias -->
+                        <Border Grid.Column="0"
+                                StrokeThickness="0"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16"/>
+                            </Border.StrokeShape>
+                            <Border.Shadow>
+                                <Shadow Brush="Black" 
+                                        Opacity="0.12" 
+                                        Radius="12" 
+                                        Offset="0,3"/>
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ViewEarningsCommand}"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="3" 
+                                                 VerticalOptions="Center"
+                                                 Padding="8">
+                                <Label Text="💰" 
+                                       FontSize="22"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="{Binding Earnings}" 
+                                       FontSize="20" 
+                                       FontAttributes="Bold"
+                                       TextColor="#4CAF50"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="Ganancias" 
+                                       FontSize="11"
+                                       TextColor="#757575"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
 
-                <!-- Contenedor dinámico de vehículos -->
-                <VerticalStackLayout x:Name="VehiclesContainer" Spacing="15"/>
+                        <!-- Stat 2: Solicitudes -->
+                        <Border Grid.Column="1"
+                                StrokeThickness="0"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16"/>
+                            </Border.StrokeShape>
+                            <Border.Shadow>
+                                <Shadow Brush="Black" 
+                                        Opacity="0.12" 
+                                        Radius="12" 
+                                        Offset="0,3"/>
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ViewRentalsCommand}"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="3" 
+                                                 VerticalOptions="Center"
+                                                 Padding="8">
+                                <Label Text="📨" 
+                                       FontSize="22"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="{Binding RequestsCount}" 
+                                       FontSize="22" 
+                                       FontAttributes="Bold"
+                                       TextColor="#FF9800"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="Solicitudes" 
+                                       FontSize="11"
+                                       TextColor="#757575"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
 
-            </VerticalStackLayout>
-        </ScrollView>
+                        <!-- Stat 3: Rentas Activas -->
+                        <Border Grid.Column="2"
+                                StrokeThickness="0"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16"/>
+                            </Border.StrokeShape>
+                            <Border.Shadow>
+                                <Shadow Brush="Black" 
+                                        Opacity="0.12" 
+                                        Radius="12" 
+                                        Offset="0,3"/>
+                            </Border.Shadow>
+                            <VerticalStackLayout Spacing="3" 
+                                                 VerticalOptions="Center"
+                                                 Padding="8">
+                                <Label Text="🚗" 
+                                       FontSize="22"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="{Binding ActiveCount}" 
+                                       FontSize="22" 
+                                       FontAttributes="Bold"
+                                       TextColor="#1E88E5"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="Activas" 
+                                       FontSize="11"
+                                       TextColor="#757575"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- Sección Acciones Rápidas -->
+                    <Label Text="ACCIONES RÁPIDAS" 
+                           FontSize="12" 
+                           FontAttributes="Bold"
+                           TextColor="#9E9E9E"
+                           CharacterSpacing="2"
+                           Margin="25,5,20,8"/>
+
+                    <Grid ColumnDefinitions="*,*" 
+                          ColumnSpacing="10"
+                          Margin="20,0,20,15">
+                        
+                        <!-- Ver Ganancias -->
+                        <Border Grid.Column="0"
+                                StrokeThickness="0"
+                                Padding="15"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14"/>
+                            </Border.StrokeShape>
+                            <Border.Shadow>
+                                <Shadow Brush="Black" 
+                                        Opacity="0.08" 
+                                        Radius="10" 
+                                        Offset="0,2"/>
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ViewEarningsCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Grid.Column="0"
+                                        WidthRequest="38"
+                                        HeightRequest="38"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#E8F5E9">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="📊" 
+                                           FontSize="18"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" 
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label Text="Ganancias" 
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           TextColor="#212121"/>
+                                    <Label Text="Ver detalles" 
+                                           FontSize="11"
+                                           TextColor="#757575"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <!-- Ver Solicitudes -->
+                        <Border Grid.Column="1"
+                                StrokeThickness="0"
+                                Padding="15"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14"/>
+                            </Border.StrokeShape>
+                            <Border.Shadow>
+                                <Shadow Brush="Black" 
+                                        Opacity="0.08" 
+                                        Radius="10" 
+                                        Offset="0,2"/>
+                            </Border.Shadow>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ViewRentalsCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Grid.Column="0"
+                                        WidthRequest="38"
+                                        HeightRequest="38"
+                                        StrokeThickness="0"
+                                        BackgroundColor="#FFF3E0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="📋" 
+                                           FontSize="18"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" 
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label Text="Rentas" 
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           TextColor="#212121"/>
+                                    <Label Text="Gestionar" 
+                                           FontSize="11"
+                                           TextColor="#757575"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Sección de Vehículos -->
+                    <Grid Margin="20,10,20,15" ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0"
+                               Text="MIS VEHÍCULOS" 
+                               FontSize="12" 
+                               FontAttributes="Bold"
+                               TextColor="#9E9E9E"
+                               CharacterSpacing="2"
+                               VerticalOptions="Center"/>
+                        <Label Grid.Column="1"
+                               Text="{Binding TotalCount, StringFormat='{0} total'}" 
+                               FontSize="11"
+                               TextColor="#1E88E5"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"/>
+                    </Grid>
+
+                    <!-- Lista de Vehículos -->
+                    <CollectionView ItemsSource="{Binding Vehicles}"
+                                    Margin="20,0,20,20"
+                                    ItemSizingStrategy="MeasureFirstItem"
+                                    IsVisible="{Binding HasVehicles}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="12"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Vehicle">
+                                <Border StrokeThickness="0"
+                                        Padding="0"
+                                        BackgroundColor="White">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="16"/>
+                                    </Border.StrokeShape>
+                                    <Border.Shadow>
+                                        <Shadow Brush="Black" 
+                                                Opacity="0.1" 
+                                                Radius="10" 
+                                                Offset="0,3"/>
+                                    </Border.Shadow>
+                                    <VerticalStackLayout Spacing="0">
+                                        
+                                        <!-- Header del card -->
+                                        <Grid Padding="15"
+                                              ColumnDefinitions="Auto,*,Auto"
+                                              ColumnSpacing="14">
+
+                                            <!-- Icono del vehículo -->
+                                            <Border Grid.Column="0"
+                                                    WidthRequest="65"
+                                                    HeightRequest="65"
+                                                    StrokeThickness="0"
+                                                    VerticalOptions="Center">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="14"/>
+                                                </Border.StrokeShape>
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#E3F2FD" Offset="0.0"/>
+                                                        <GradientStop Color="#BBDEFB" Offset="1.0"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Label Text="🚗"
+                                                       FontSize="34"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"/>
+                                            </Border>
+
+                                            <!-- Información -->
+                                            <VerticalStackLayout Grid.Column="1" 
+                                                                 Spacing="3"
+                                                                 VerticalOptions="Center">
+                                                <Label Text="{Binding Brand}"
+                                                       FontSize="10"
+                                                       TextColor="#9E9E9E"
+                                                       FontAttributes="Bold"
+                                                       TextTransform="Uppercase"/>
+                                                <Label Text="{Binding DisplayName}"
+                                                       FontSize="15"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#212121"
+                                                       LineBreakMode="TailTruncation"/>
+                                                <HorizontalStackLayout Spacing="10" Margin="0,2,0,0">
+                                                    <HorizontalStackLayout Spacing="3">
+                                                        <Label Text="👥" FontSize="11"/>
+                                                        <Label Text="{Binding Seats}" 
+                                                               FontSize="11" 
+                                                               TextColor="#616161"/>
+                                                    </HorizontalStackLayout>
+                                                    <HorizontalStackLayout Spacing="3">
+                                                        <Label Text="⚙️" FontSize="11"/>
+                                                        <Label Text="{Binding TransmissionDisplay}" 
+                                                               FontSize="11" 
+                                                               TextColor="#616161"/>
+                                                    </HorizontalStackLayout>
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+
+                                            <!-- Badge de estado -->
+                                            <Border Grid.Column="2"
+                                                    StrokeThickness="0"
+                                                    Padding="10,5"
+                                                    VerticalOptions="Start">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="10"/>
+                                                </Border.StrokeShape>
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" 
+                                                                 Binding="{Binding IsAvailable}" 
+                                                                 Value="True">
+                                                        <Setter Property="BackgroundColor" Value="#E8F5E9"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Border" 
+                                                                 Binding="{Binding IsAvailable}" 
+                                                                 Value="False">
+                                                        <Setter Property="BackgroundColor" Value="#FFF3E0"/>
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <Label FontSize="10"
+                                                       FontAttributes="Bold">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" 
+                                                                     Binding="{Binding IsAvailable}" 
+                                                                     Value="True">
+                                                            <Setter Property="Text" Value="✓ Disponible"/>
+                                                            <Setter Property="TextColor" Value="#4CAF50"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Label" 
+                                                                     Binding="{Binding IsAvailable}" 
+                                                                     Value="False">
+                                                            <Setter Property="Text" Value="🔒 Rentado"/>
+                                                            <Setter Property="TextColor" Value="#FF9800"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- Divider -->
+                                        <BoxView HeightRequest="1" 
+                                                 BackgroundColor="#F5F5F5"
+                                                 Margin="15,0"/>
+
+                                        <!-- Footer con precio y acciones -->
+                                        <Grid Padding="15"
+                                              ColumnDefinitions="*,Auto,Auto"
+                                              ColumnSpacing="10">
+                                            
+                                            <!-- Precio y ubicación -->
+                                            <VerticalStackLayout Grid.Column="0" 
+                                                                 Spacing="2"
+                                                                 VerticalOptions="Center">
+                                                <Label HorizontalOptions="Start">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="$" 
+                                                                  FontSize="11" 
+                                                                  TextColor="#4CAF50"
+                                                                  FontAttributes="Bold"/>
+                                                            <Span Text="{Binding PricePerDay, StringFormat='{0:F0}'}" 
+                                                                  FontSize="18" 
+                                                                  TextColor="#4CAF50"
+                                                                  FontAttributes="Bold"/>
+                                                            <Span Text=" /día" 
+                                                                  FontSize="11" 
+                                                                  TextColor="#9E9E9E"/>
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                                <HorizontalStackLayout Spacing="3" 
+                                                                      IsVisible="{Binding Location, Converter={StaticResource InvertedBoolConverter}}">
+                                                    <Label Text="📍" FontSize="10"/>
+                                                    <Label Text="{Binding Location}" 
+                                                           FontSize="11" 
+                                                           TextColor="#1E88E5"
+                                                           LineBreakMode="TailTruncation"/>
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+
+                                            <!-- Botón Editar -->
+                                            <Border Grid.Column="1"
+                                                    StrokeThickness="1.5"
+                                                    Stroke="#1E88E5"
+                                                    BackgroundColor="Transparent"
+                                                    Padding="12,8"
+                                                    VerticalOptions="Center">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="10"/>
+                                                </Border.StrokeShape>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MyVehiclesViewModel}}, Path=EditVehicleCommand}" 
+                                                                          CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <HorizontalStackLayout Spacing="4">
+                                                    <Label Text="✏️" FontSize="11" VerticalOptions="Center"/>
+                                                    <Label Text="Editar" 
+                                                           FontSize="11"
+                                                           FontAttributes="Bold"
+                                                           TextColor="#1E88E5"
+                                                           VerticalOptions="Center"/>
+                                                </HorizontalStackLayout>
+                                            </Border>
+
+                                            <!-- Botón Eliminar -->
+                                            <Border Grid.Column="2"
+                                                    StrokeThickness="1.5"
+                                                    Stroke="#F44336"
+                                                    BackgroundColor="Transparent"
+                                                    Padding="10,8"
+                                                    VerticalOptions="Center">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="10"/>
+                                                </Border.StrokeShape>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MyVehiclesViewModel}}, Path=DeleteVehicleCommand}" 
+                                                                          CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Label Text="🗑️" 
+                                                       FontSize="14"
+                                                       VerticalOptions="Center"/>
+                                            </Border>
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Estado vacío -->
+                    <VerticalStackLayout IsVisible="{Binding HasVehicles, Converter={StaticResource InvertedBoolConverter}}"
+                                         Padding="30,40"
+                                         Spacing="15"
+                                         HorizontalOptions="Center">
+                        <Border WidthRequest="100"
+                                HeightRequest="100"
+                                StrokeThickness="0"
+                                BackgroundColor="#E3F2FD"
+                                HorizontalOptions="Center">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="50"/>
+                            </Border.StrokeShape>
+                            <Label Text="🚗" 
+                                   FontSize="50"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>
+                        <Label Text="Sin vehículos registrados" 
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#212121"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Agrega tu primer vehículo para empezar a generar ingresos" 
+                               FontSize="13"
+                               TextColor="#757575"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+
+                    <!-- Espacio inferior para el FAB -->
+                    <BoxView HeightRequest="100" BackgroundColor="Transparent"/>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <!-- Floating Action Button -->
+        <Border Grid.Row="0"
+                StrokeThickness="0"
+                WidthRequest="160"
+                HeightRequest="55"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="0,0,20,20">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="28"/>
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="#1565C0" 
+                        Opacity="0.5" 
+                        Radius="15" 
+                        Offset="0,5"/>
+            </Border.Shadow>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#1E88E5" Offset="0.0"/>
+                    <GradientStop Color="#1565C0" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding AddVehicleCommand}"/>
+            </Border.GestureRecognizers>
+            <HorizontalStackLayout Spacing="6" 
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center">
+                <Label Text="+" 
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+                <Label Text="Agregar Auto" 
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </Border>
 
     </Grid>
 
