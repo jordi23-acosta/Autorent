@@ -159,12 +159,20 @@ namespace AUTORENT.ViewModels
             {
                 EmailError = "Ingresa un email válido";
                 IsEmailValid = false;
+                return;
             }
-            else
+
+            // Verificar typos comunes en dominios
+            var typoSuggestion = ErrorTranslator.CheckEmailTypo(_email);
+            if (typoSuggestion != null)
             {
-                EmailError = string.Empty;
-                IsEmailValid = true;
+                EmailError = $"¿Quisiste decir @{typoSuggestion}?";
+                IsEmailValid = false;
+                return;
             }
+
+            EmailError = string.Empty;
+            IsEmailValid = true;
         }
 
         private void ValidatePassword()
@@ -211,7 +219,18 @@ namespace AUTORENT.ViewModels
                 }
                 else
                 {
-                    GeneralError = message;
+                    // Si las credenciales son incorrectas, verificar typo en email
+                    var emailTypo = ErrorTranslator.CheckEmailTypo(Email);
+                    if (emailTypo != null && message.Contains("incorrect", StringComparison.OrdinalIgnoreCase) 
+                        || (emailTypo != null && (message.Contains("incorrectos") || message.Contains("incorrecta"))))
+                    {
+                        var domain = Email.Split('@').LastOrDefault();
+                        GeneralError = $"¿Quisiste decir @{emailTypo}? Verifica tu email";
+                    }
+                    else
+                    {
+                        GeneralError = message;
+                    }
                 }
             }
             catch (Exception ex)

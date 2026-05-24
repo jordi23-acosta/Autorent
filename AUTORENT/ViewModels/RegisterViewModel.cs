@@ -288,12 +288,20 @@ namespace AUTORENT.ViewModels
             {
                 EmailError = "Ingresa un email válido";
                 IsEmailValid = false;
+                return;
             }
-            else
+
+            // Verificar typos comunes en dominios
+            var typoSuggestion = ErrorTranslator.CheckEmailTypo(_email);
+            if (typoSuggestion != null)
             {
-                EmailError = string.Empty;
-                IsEmailValid = true;
+                EmailError = $"¿Quisiste decir @{typoSuggestion}?";
+                IsEmailValid = false;
+                return;
             }
+
+            EmailError = string.Empty;
+            IsEmailValid = true;
         }
 
         private void ValidatePhone()

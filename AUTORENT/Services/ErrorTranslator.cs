@@ -6,6 +6,50 @@ namespace AUTORENT.Services
     /// </summary>
     public static class ErrorTranslator
     {
+        /// <summary>
+        /// Detecta typos comunes en dominios de email
+        /// </summary>
+        public static string? CheckEmailTypo(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+                return null;
+
+            var domain = email.Split('@').LastOrDefault()?.ToLower();
+            if (string.IsNullOrEmpty(domain)) return null;
+
+            // Typos comunes
+            var typos = new Dictionary<string, string>
+            {
+                { "gmal.com", "gmail.com" },
+                { "gmai.com", "gmail.com" },
+                { "gmial.com", "gmail.com" },
+                { "gnail.com", "gmail.com" },
+                { "gmail.co", "gmail.com" },
+                { "gmail.cm", "gmail.com" },
+                { "gmaill.com", "gmail.com" },
+                { "hotmial.com", "hotmail.com" },
+                { "hotmal.com", "hotmail.com" },
+                { "hotmail.co", "hotmail.com" },
+                { "hotnail.com", "hotmail.com" },
+                { "outlok.com", "outlook.com" },
+                { "outloo.com", "outlook.com" },
+                { "outlook.co", "outlook.com" },
+                { "yaho.com", "yahoo.com" },
+                { "yahooo.com", "yahoo.com" },
+                { "yahoo.co", "yahoo.com" },
+                { "iclod.com", "icloud.com" },
+                { "icoud.com", "icloud.com" },
+                { "icloud.co", "icloud.com" }
+            };
+
+            if (typos.TryGetValue(domain, out var suggestion))
+            {
+                return suggestion;
+            }
+
+            return null;
+        }
+
         public static string TranslateError(string errorMessage)
         {
             if (string.IsNullOrWhiteSpace(errorMessage))
