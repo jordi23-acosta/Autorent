@@ -107,7 +107,7 @@ namespace AUTORENT.Services
             {
                 System.Diagnostics.Debug.WriteLine($"[AUTH] ❌ Error en login: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"[AUTH] Stack: {ex.StackTrace}");
-                return (false, $"Error: {ex.Message}", null);
+                return (false, ErrorTranslator.TranslateError(ex.Message), null);
             }
         }
 
@@ -226,7 +226,7 @@ namespace AUTORENT.Services
             {
                 System.Diagnostics.Debug.WriteLine($"[REGISTRO] Error general: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"[REGISTRO] Stack trace: {ex.StackTrace}");
-                return (false, $"Error: {ex.Message}", null);
+                return (false, ErrorTranslator.TranslateError(ex.Message), null);
             }
         }
 

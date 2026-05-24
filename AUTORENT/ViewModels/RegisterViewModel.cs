@@ -436,7 +436,7 @@ namespace AUTORENT.ViewModels
             }
             catch (Exception ex)
             {
-                GeneralError = $"Error: {ex.Message}";
+                GeneralError = ErrorTranslator.TranslateError(ex.Message);
             }
             finally
             {
