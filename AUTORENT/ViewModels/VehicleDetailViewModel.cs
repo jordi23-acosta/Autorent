@@ -18,6 +18,7 @@ namespace AUTORENT.ViewModels
         private string _generalError = string.Empty;
         private bool _hasGeneralError;
         private bool _showSuccess;
+        private string _paymentMethod = "efectivo";
 
         public VehicleDetailViewModel(Vehicle vehicle)
         {
@@ -29,6 +30,7 @@ namespace AUTORENT.ViewModels
 
             RequestRentalCommand = new AsyncRelayCommand(RequestRentalAsync, CanRequestRental);
             DismissErrorCommand = new RelayCommand(DismissError);
+            SelectPaymentMethodCommand = new RelayCommand<string>(SelectPaymentMethod);
 
             _ = LoadOwnerInfoAsync();
         }
@@ -206,8 +208,33 @@ namespace AUTORENT.ViewModels
             set => SetProperty(ref _showSuccess, value);
         }
 
+        public string PaymentMethod
+        {
+            get => _paymentMethod;
+            set
+            {
+                if (SetProperty(ref _paymentMethod, value))
+                {
+                    OnPropertyChanged(nameof(IsPaymentCash));
+                    OnPropertyChanged(nameof(IsPaymentTransfer));
+                    OnPropertyChanged(nameof(PaymentMethodLabel));
+                }
+            }
+        }
+
+        public bool IsPaymentCash => _paymentMethod == "efectivo";
+        public bool IsPaymentTransfer => _paymentMethod == "transferencia";
+
+        public string PaymentMethodLabel => _paymentMethod switch
+        {
+            "efectivo" => "💵 Efectivo al recibir el auto",
+            "transferencia" => "🏦 Transferencia bancaria",
+            _ => "Selecciona método de pago"
+        };
+
         public ICommand RequestRentalCommand { get; }
         public ICommand DismissErrorCommand { get; }
+        public ICommand SelectPaymentMethodCommand { get; }
 
         private bool CanRequestRental()
         {
@@ -281,7 +308,8 @@ namespace AUTORENT.ViewModels
                 $"📅 Desde: {StartDateFormatted}\n" +
                 $"📅 Hasta: {EndDateFormatted}\n" +
                 $"⏱️ {TotalDays} día(s)\n\n" +
-                $"💰 Total: {TotalPriceFormatted}\n\n" +
+                $"💰 Total: {TotalPriceFormatted}\n" +
+                $"{PaymentMethodLabel}\n\n" +
                 $"¿Confirmas tu solicitud?",
                 "Sí, solicitar",
                 "Cancelar");
@@ -309,6 +337,7 @@ namespace AUTORENT.ViewModels
                     EndDate = EndDate,
                     TotalPrice = TotalPrice,
                     StatusString = "pendiente",
+                    PaymentMethod = PaymentMethod,
                     PickupLocation = PickupLocation?.Trim() ?? "",
                     Notes = Notes?.Trim() ?? "",
                     CreatedAt = DateTime.UtcNow,
@@ -323,9 +352,14 @@ namespace AUTORENT.ViewModels
 
                 ShowSuccess = true;
 
+                string paymentInfo = PaymentMethod == "efectivo"
+                    ? "💵 Pagarás en efectivo al recibir el auto"
+                    : "🏦 El propietario te enviará los datos bancarios al aceptar";
+
                 await Application.Current!.MainPage!.DisplayAlert(
                     "🎉 ¡Solicitud Enviada!",
                     $"Tu solicitud de renta ha sido enviada al propietario.\n\n" +
+                    $"{paymentInfo}\n\n" +
                     $"Recibirás una notificación cuando sea aprobada.\n\n" +
                     $"Puedes ver el estado en 'Mis Rentas'.",
                     "OK");
@@ -368,6 +402,12 @@ namespace AUTORENT.ViewModels
         private void DismissError()
         {
             GeneralError = string.Empty;
+        }
+
+        private void SelectPaymentMethod(string? method)
+        {
+            if (string.IsNullOrEmpty(method)) return;
+            PaymentMethod = method;
         }
     }
 }

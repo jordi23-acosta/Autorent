@@ -34,6 +34,7 @@ namespace AUTORENT.ViewModels
             AcceptRequestCommand = new AsyncRelayCommand<RentalRequest>(AcceptRequestAsync);
             RejectRequestCommand = new AsyncRelayCommand<RentalRequest>(RejectRequestAsync);
             ViewDetailsCommand = new AsyncRelayCommand<RentalRequest>(ViewDetailsAsync);
+            ContactRenterCommand = new AsyncRelayCommand<RentalRequest>(ContactRenterAsync);
         }
 
         public ObservableCollection<RentalRequest> PendingRequests
@@ -106,6 +107,7 @@ namespace AUTORENT.ViewModels
         public ICommand AcceptRequestCommand { get; }
         public ICommand RejectRequestCommand { get; }
         public ICommand ViewDetailsCommand { get; }
+        public ICommand ContactRenterCommand { get; }
 
         public async Task LoadDataAsync()
         {
@@ -211,9 +213,15 @@ namespace AUTORENT.ViewModels
         {
             if (request == null) return;
 
+            string paymentInfo = request.Rental.PaymentMethod == "efectivo"
+                ? "💵 El conductor pagará en efectivo al recibir el auto"
+                : "🏦 Recuerda compartir tus datos bancarios al conductor";
+
             bool confirm = await Application.Current!.MainPage!.DisplayAlert(
                 "✓ Aceptar Solicitud",
-                $"¿Confirmas que aceptas la renta de {request.RenterName} para {request.VehicleName}?",
+                $"¿Confirmas que aceptas la renta de {request.RenterName} para {request.VehicleName}?\n\n" +
+                $"💰 Total: {request.TotalPriceFormatted}\n" +
+                $"{paymentInfo}",
                 "Sí, aceptar",
                 "Cancelar");
 
@@ -231,9 +239,13 @@ namespace AUTORENT.ViewModels
                     .Set(x => x.UpdatedAt, DateTime.UtcNow)
                     .Update();
 
+                string nextSteps = request.Rental.PaymentMethod == "efectivo"
+                    ? $"📞 Contacta al conductor para coordinar entrega.\n\n💵 El pago en efectivo se realizará al entregar el vehículo."
+                    : $"📞 Contacta al conductor y envíale tus datos bancarios para que realice la transferencia.";
+
                 await Application.Current!.MainPage!.DisplayAlert(
                     "🎉 ¡Confirmado!",
-                    "La solicitud ha sido aceptada exitosamente",
+                    $"La solicitud ha sido aceptada exitosamente.\n\n{nextSteps}",
                     "OK");
 
                 await LoadDataAsync();
@@ -306,8 +318,68 @@ namespace AUTORENT.ViewModels
                 $"Teléfono: {request.RenterPhone}\n\n" +
                 $"Vehículo: {request.VehicleName}\n" +
                 $"Fechas: {request.DateRangeText}\n" +
-                $"Total: {request.TotalPriceFormatted}",
+                $"Total: {request.TotalPriceFormatted}\n" +
+                $"Pago: {request.PaymentMethodText}",
                 "OK");
+        }
+
+        private async Task ContactRenterAsync(RentalRequest? request)
+        {
+            if (request == null || !request.HasPhone) 
+            {
+                await Application.Current!.MainPage!.DisplayAlert(
+                    "Sin teléfono",
+                    "El conductor no tiene un teléfono registrado",
+                    "OK");
+                return;
+            }
+
+            string action = await Application.Current!.MainPage!.DisplayActionSheet(
+                $"Contactar a {request.RenterName}",
+                "Cancelar",
+                null,
+                "💬 WhatsApp",
+                "📞 Llamar",
+                "📧 Email");
+
+            try
+            {
+                var phone = System.Text.RegularExpressions.Regex.Replace(request.RenterPhone, @"\D", "");
+
+                if (action == "💬 WhatsApp")
+                {
+                    string message = Uri.EscapeDataString(
+                        $"Hola {request.RenterName}, soy el propietario del {request.VehicleName} que rentaste en AUTORENT. Te contacto para coordinar la entrega.");
+                    var url = $"https://wa.me/{phone}?text={message}";
+                    await Microsoft.Maui.ApplicationModel.Browser.OpenAsync(url);
+                }
+                else if (action == "📞 Llamar")
+                {
+                    var call = Microsoft.Maui.ApplicationModel.Communication.PhoneDialer.Default;
+                    if (call.IsSupported)
+                    {
+                        call.Open(phone);
+                    }
+                }
+                else if (action == "📧 Email")
+                {
+                    var email = new Microsoft.Maui.ApplicationModel.Communication.EmailMessage
+                    {
+                        Subject = $"AUTORENT - Renta de {request.VehicleName}",
+                        Body = $"Hola {request.RenterName},\n\nSoy el propietario del vehículo que rentaste. Te contacto para coordinar la entrega.\n\nSaludos.",
+                        To = new List<string> { request.RenterEmail }
+                    };
+                    await Microsoft.Maui.ApplicationModel.Communication.Email.Default.ComposeAsync(email);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error contactando: {ex.Message}");
+                await Application.Current!.MainPage!.DisplayAlert(
+                    "Error",
+                    "No se pudo abrir la aplicación de contacto",
+                    "OK");
+            }
         }
     }
 
@@ -320,6 +392,7 @@ namespace AUTORENT.ViewModels
         public string RenterName => Renter?.FullName ?? "Usuario";
         public string RenterEmail => Renter?.Email ?? "Sin email";
         public string RenterPhone => Renter?.Phone ?? "Sin teléfono";
+        public bool HasPhone => !string.IsNullOrWhiteSpace(Renter?.Phone);
         public string RenterInitials
         {
             get
@@ -353,6 +426,20 @@ namespace AUTORENT.ViewModels
         public int TotalDays => Math.Max(1, (int)(Rental.EndDate - Rental.StartDate).TotalDays);
         public string DateRangeText => $"{Rental.StartDate:dd MMM} - {Rental.EndDate:dd MMM yyyy} ({TotalDays} días)";
         public string TotalPriceFormatted => $"${Rental.TotalPrice:F0}";
+
+        public string PaymentMethodText => Rental.PaymentMethod switch
+        {
+            "efectivo" => "💵 Efectivo",
+            "transferencia" => "🏦 Transferencia",
+            _ => "💰 Pendiente"
+        };
+
+        public Color PaymentMethodColor => Rental.PaymentMethod switch
+        {
+            "efectivo" => Color.FromArgb("#43A047"),
+            "transferencia" => Color.FromArgb("#1E88E5"),
+            _ => Color.FromArgb("#9E9E9E")
+        };
 
         public Color AvatarColor
         {

@@ -44,6 +44,9 @@ namespace AUTORENT.Models
         [Column("notes")]
         public string? Notes { get; set; }
 
+        [Column("payment_method")]
+        public string PaymentMethod { get; set; } = "efectivo";
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 

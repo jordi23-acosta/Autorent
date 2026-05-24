@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS rentals (
     end_date DATE NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
     status TEXT DEFAULT 'pendiente' CHECK (status IN ('pendiente', 'confirmada', 'activa', 'completada', 'cancelada')),
+    payment_method TEXT DEFAULT 'efectivo' CHECK (payment_method IN ('efectivo', 'transferencia')),
     pickup_location TEXT,
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
