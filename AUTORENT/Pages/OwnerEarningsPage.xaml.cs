@@ -1,18 +1,22 @@
+using AUTORENT.ViewModels;
+
 namespace AUTORENT.Pages
 {
     public partial class OwnerEarningsPage : ContentPage
     {
+        private readonly OwnerEarningsViewModel _viewModel;
+
         public OwnerEarningsPage()
         {
             InitializeComponent();
+            _viewModel = new OwnerEarningsViewModel();
+            BindingContext = _viewModel;
         }
 
-        private async void OnWithdrawClicked(object? sender, EventArgs e)
+        protected override async void OnAppearing()
         {
-            await DisplayAlert(
-                "💸 Retiro de Fondos",
-                "Tu solicitud de retiro será procesada en 2-3 días hábiles.\n\nMonto disponible: $12,450",
-                "OK");
+            base.OnAppearing();
+            await _viewModel.LoadDataAsync();
         }
 
         private async void OnBackTapped(object? sender, TappedEventArgs e)

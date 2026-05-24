@@ -1,52 +1,22 @@
+using AUTORENT.ViewModels;
+
 namespace AUTORENT.Pages
 {
     public partial class OwnerRentalsPage : ContentPage
     {
+        private readonly OwnerRentalsViewModel _viewModel;
+
         public OwnerRentalsPage()
         {
             InitializeComponent();
+            _viewModel = new OwnerRentalsViewModel();
+            BindingContext = _viewModel;
         }
 
-        private async void OnAcceptClicked(object? sender, EventArgs e)
+        protected override async void OnAppearing()
         {
-            bool answer = await DisplayAlert(
-                "✓ Aceptar Solicitud",
-                "¿Confirmas que aceptas esta renta?\n\nEl cliente recibirá una notificación.",
-                "Sí, aceptar",
-                "Cancelar");
-
-            if (answer)
-            {
-                await DisplayAlert(
-                    "🎉 ¡Confirmado!",
-                    "La solicitud ha sido aceptada exitosamente",
-                    "OK");
-            }
-        }
-
-        private async void OnRejectClicked(object? sender, EventArgs e)
-        {
-            bool answer = await DisplayAlert(
-                "✕ Rechazar Solicitud",
-                "¿Estás seguro que deseas rechazar esta renta?",
-                "Sí, rechazar",
-                "Cancelar");
-
-            if (answer)
-            {
-                await DisplayAlert(
-                    "Rechazada",
-                    "La solicitud ha sido rechazada",
-                    "OK");
-            }
-        }
-
-        private async void OnViewDetailsClicked(object? sender, EventArgs e)
-        {
-            await DisplayAlert(
-                "📋 Detalles de Renta",
-                "Aquí verás información detallada de la renta activa",
-                "OK");
+            base.OnAppearing();
+            await _viewModel.LoadDataAsync();
         }
 
         private async void OnBackTapped(object? sender, TappedEventArgs e)
