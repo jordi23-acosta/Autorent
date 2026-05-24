@@ -2,197 +2,430 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AUTORENT.Pages.OwnerRentalsPage"
-             Title="Solicitudes de Renta"
-             BackgroundColor="#F5F5F5">
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F8F9FA">
 
-    <Grid RowDefinitions="Auto,*" Padding="0">
-        
-        <!-- Header -->
-        <BoxView Grid.Row="0" HeightRequest="120" BackgroundColor="#1E88E5"/>
-        <VerticalStackLayout Grid.Row="0" Padding="20" VerticalOptions="Center">
-            <Label Text="Solicitudes de Renta" 
-                   FontSize="28" 
-                   FontAttributes="Bold"
-                   TextColor="White"/>
-            <Label Text="Gestiona las reservaciones" 
-                   FontSize="14"
-                   TextColor="#E3F2FD"
-                   Margin="0,5,0,0"/>
-        </VerticalStackLayout>
+    <Grid RowDefinitions="*">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
 
-        <!-- Content -->
-        <ScrollView Grid.Row="1" Margin="0,-20,0,0">
-            <VerticalStackLayout Spacing="15" Padding="20">
+                <!-- Header con gradiente -->
+                <Grid HeightRequest="180">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#1E88E5" Offset="0.0" />
+                            <GradientStop Color="#1565C0" Offset="0.5" />
+                            <GradientStop Color="#0D47A1" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
 
-                <!-- Pendientes -->
-                <Label Text="Pendientes de Aprobación" 
-                       FontSize="18" 
-                       FontAttributes="Bold"
-                       TextColor="#212121"
-                       Margin="0,10,0,5"/>
+                    <Ellipse Fill="#FFFFFF" 
+                             Opacity="0.1"
+                             WidthRequest="180" 
+                             HeightRequest="180"
+                             HorizontalOptions="End"
+                             VerticalOptions="Start"
+                             Margin="0,-40,-40,0"/>
+
+                    <Grid ColumnDefinitions="Auto,*" 
+                          RowDefinitions="Auto,*"
+                          Padding="20,50,20,15">
+
+                        <!-- Botón regreso -->
+                        <Border Grid.Row="0" Grid.Column="0"
+                                StrokeThickness="0"
+                                BackgroundColor="#33FFFFFF"
+                                WidthRequest="42"
+                                HeightRequest="42">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="21"/>
+                            </Border.StrokeShape>
+                            <Label Text="←"
+                                   FontSize="22"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnBackTapped"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Border>
+
+                        <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2" 
+                                             VerticalOptions="Center"
+                                             Spacing="4"
+                                             Margin="0,15,0,0">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="📋" FontSize="20"/>
+                                <Label Text="GESTIÓN DE RENTAS" 
+                                       FontSize="11"
+                                       FontAttributes="Bold"
+                                       TextColor="#E3F2FD"
+                                       CharacterSpacing="2"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                            <Label Text="Solicitudes" 
+                                   FontSize="26" 
+                                   FontAttributes="Bold"
+                                   TextColor="White"/>
+                            <Label Text="Aprueba o rechaza las solicitudes" 
+                                   FontSize="13"
+                                   TextColor="#E3F2FD"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Grid>
+
+                <!-- Sección Pendientes -->
+                <Grid Margin="20,15,20,5" ColumnDefinitions="Auto,*,Auto">
+                    <Label Grid.Column="0" Text="⏳" FontSize="14" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" 
+                           Text="PENDIENTES DE APROBACIÓN" 
+                           FontSize="12" 
+                           FontAttributes="Bold"
+                           TextColor="#F57C00"
+                           CharacterSpacing="2"
+                           Margin="6,0,0,0"
+                           VerticalOptions="Center"/>
+                    <Border Grid.Column="2"
+                            StrokeThickness="0"
+                            BackgroundColor="#FFF3E0"
+                            Padding="8,3"
+                            VerticalOptions="Center">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <Label Text="2 nuevas" 
+                               FontSize="10"
+                               FontAttributes="Bold"
+                               TextColor="#F57C00"/>
+                    </Border>
+                </Grid>
 
                 <!-- Solicitud 1 -->
-                <Frame CornerRadius="15" 
-                       HasShadow="True"
-                       BackgroundColor="White"
-                       Padding="15">
-                    <VerticalStackLayout Spacing="15">
-                        <HorizontalStackLayout Spacing="15">
-                            <Frame WidthRequest="70" HeightRequest="70" CornerRadius="35" Padding="0" BackgroundColor="#E3F2FD" HasShadow="False">
-                                <Label Text="👤" FontSize="35" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Frame>
-                            <VerticalStackLayout Spacing="5" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                                <Label Text="Carlos Mendoza" FontSize="18" FontAttributes="Bold" TextColor="#212121"/>
-                                <Label Text="⭐ 4.8 • 12 rentas" FontSize="12" TextColor="#757575"/>
-                                <Frame Padding="6,3" CornerRadius="8" BackgroundColor="#FFF3E0" HasShadow="False" HorizontalOptions="Start" Margin="0,3,0,0">
-                                    <Label Text="Nuevo" FontSize="10" TextColor="#FF9800" FontAttributes="Bold"/>
-                                </Frame>
+                <Border Margin="20,5,20,12"
+                        StrokeThickness="0"
+                        BackgroundColor="White">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16"/>
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.1" Radius="10" Offset="0,3"/>
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="0">
+                        
+                        <!-- Header del card -->
+                        <Grid Padding="15" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border Grid.Column="0"
+                                    WidthRequest="55" HeightRequest="55"
+                                    StrokeThickness="2"
+                                    Stroke="#E3F2FD"
+                                    BackgroundColor="#1E88E5"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="28"/>
+                                </Border.StrokeShape>
+                                <Label Text="CM" FontSize="18" 
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       HorizontalOptions="Center" 
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                <Label Text="Carlos Mendoza" FontSize="15" 
+                                       FontAttributes="Bold" TextColor="#212121"/>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="⭐ 4.8" FontSize="11" 
+                                           TextColor="#FF9800" FontAttributes="Bold"/>
+                                    <Label Text="·" FontSize="11" TextColor="#9E9E9E"/>
+                                    <Label Text="12 rentas" FontSize="11" TextColor="#9E9E9E"/>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
-                        </HorizontalStackLayout>
-
-                        <BoxView HeightRequest="1" BackgroundColor="#E0E0E0"/>
-
-                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
-                            <Label Grid.Row="0" Grid.Column="0" Text="🚙" FontSize="16"/>
-                            <Label Grid.Row="0" Grid.Column="1" Text="Toyota Corolla 2024" FontSize="14" TextColor="#212121"/>
-                            
-                            <Label Grid.Row="1" Grid.Column="0" Text="📅" FontSize="16"/>
-                            <Label Grid.Row="1" Grid.Column="1" Text="20 - 23 Mayo 2026 (3 días)" FontSize="14" TextColor="#212121"/>
-                            
-                            <Label Grid.Row="2" Grid.Column="0" Text="💰" FontSize="16"/>
-                            <Label Grid.Row="2" Grid.Column="1" Text="$105 total" FontSize="14" FontAttributes="Bold" TextColor="#4CAF50"/>
+                            <Border Grid.Column="2"
+                                    StrokeThickness="0"
+                                    BackgroundColor="#FFF3E0"
+                                    Padding="8,4"
+                                    VerticalOptions="Start">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Label Text="🆕 Nuevo" FontSize="10" 
+                                       TextColor="#F57C00" FontAttributes="Bold"/>
+                            </Border>
                         </Grid>
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,5,0,0">
-                            <Button Grid.Column="0" 
-                                    Text="Rechazar"
+                        <BoxView HeightRequest="1" BackgroundColor="#F5F5F5" Margin="15,0"/>
+
+                        <!-- Detalles -->
+                        <VerticalStackLayout Padding="15" Spacing="8">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="🚙" FontSize="14"/>
+                                <Label Grid.Column="1" Text="Toyota Corolla 2024" 
+                                       FontSize="13" TextColor="#212121" VerticalOptions="Center"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="📅" FontSize="14"/>
+                                <Label Grid.Column="1" Text="20 - 23 Mayo 2026 (3 días)" 
+                                       FontSize="13" TextColor="#212121" VerticalOptions="Center"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="💰" FontSize="14"/>
+                                <Label Grid.Column="1" Text="Total a recibir" 
+                                       FontSize="13" TextColor="#9E9E9E" VerticalOptions="Center"/>
+                                <Label Grid.Column="2" Text="$105" 
+                                       FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#43A047" VerticalOptions="Center"/>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Botones de acción -->
+                        <Grid BackgroundColor="#FAFAFA"
+                              Padding="15,12"
+                              ColumnDefinitions="*,*"
+                              ColumnSpacing="10">
+                            <Border Grid.Column="0"
+                                    StrokeThickness="2"
+                                    Stroke="#F44336"
                                     BackgroundColor="Transparent"
-                                    TextColor="#F44336"
-                                    BorderColor="#F44336"
-                                    BorderWidth="2"
-                                    CornerRadius="10"
-                                    HeightRequest="45"
-                                    FontSize="14"
-                                    FontAttributes="Bold"
-                                    Clicked="OnRejectClicked"/>
-                            <Button Grid.Column="1" 
-                                    Text="Aceptar"
-                                    BackgroundColor="#4CAF50"
-                                    TextColor="White"
-                                    CornerRadius="10"
-                                    HeightRequest="45"
-                                    FontSize="14"
-                                    FontAttributes="Bold"
-                                    Clicked="OnAcceptClicked"/>
+                                    HeightRequest="42">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Button Text="✕ Rechazar"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#F44336"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        Clicked="OnRejectClicked"/>
+                            </Border>
+                            <Border Grid.Column="1"
+                                    StrokeThickness="0"
+                                    HeightRequest="42">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#43A047" Offset="0.0"/>
+                                        <GradientStop Color="#2E7D32" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Button Text="✓ Aceptar"
+                                        BackgroundColor="Transparent"
+                                        TextColor="White"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        Clicked="OnAcceptClicked"/>
+                            </Border>
                         </Grid>
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
                 <!-- Solicitud 2 -->
-                <Frame CornerRadius="15" 
-                       HasShadow="True"
-                       BackgroundColor="White"
-                       Padding="15">
-                    <VerticalStackLayout Spacing="15">
-                        <HorizontalStackLayout Spacing="15">
-                            <Frame WidthRequest="70" HeightRequest="70" CornerRadius="35" Padding="0" BackgroundColor="#F3E5F5" HasShadow="False">
-                                <Label Text="👤" FontSize="35" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Frame>
-                            <VerticalStackLayout Spacing="5" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                                <Label Text="Ana Rodríguez" FontSize="18" FontAttributes="Bold" TextColor="#212121"/>
-                                <Label Text="⭐ 5.0 • 28 rentas" FontSize="12" TextColor="#757575"/>
-                                <Frame Padding="6,3" CornerRadius="8" BackgroundColor="#E8F5E9" HasShadow="False" HorizontalOptions="Start" Margin="0,3,0,0">
-                                    <Label Text="Verificada" FontSize="10" TextColor="#4CAF50" FontAttributes="Bold"/>
-                                </Frame>
+                <Border Margin="20,0,20,12"
+                        StrokeThickness="0"
+                        BackgroundColor="White">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16"/>
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.1" Radius="10" Offset="0,3"/>
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="0">
+                        
+                        <Grid Padding="15" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border Grid.Column="0"
+                                    WidthRequest="55" HeightRequest="55"
+                                    StrokeThickness="2"
+                                    Stroke="#F3E5F5"
+                                    BackgroundColor="#9C27B0"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="28"/>
+                                </Border.StrokeShape>
+                                <Label Text="AR" FontSize="18" 
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       HorizontalOptions="Center" 
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                <Label Text="Ana Rodríguez" FontSize="15" 
+                                       FontAttributes="Bold" TextColor="#212121"/>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="⭐ 5.0" FontSize="11" 
+                                           TextColor="#FF9800" FontAttributes="Bold"/>
+                                    <Label Text="·" FontSize="11" TextColor="#9E9E9E"/>
+                                    <Label Text="28 rentas" FontSize="11" TextColor="#9E9E9E"/>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
-                        </HorizontalStackLayout>
-
-                        <BoxView HeightRequest="1" BackgroundColor="#E0E0E0"/>
-
-                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="10">
-                            <Label Grid.Row="0" Grid.Column="0" Text="🚐" FontSize="16"/>
-                            <Label Grid.Row="0" Grid.Column="1" Text="Honda CR-V 2024" FontSize="14" TextColor="#212121"/>
-                            
-                            <Label Grid.Row="1" Grid.Column="0" Text="📅" FontSize="16"/>
-                            <Label Grid.Row="1" Grid.Column="1" Text="25 - 30 Mayo 2026 (5 días)" FontSize="14" TextColor="#212121"/>
-                            
-                            <Label Grid.Row="2" Grid.Column="0" Text="💰" FontSize="16"/>
-                            <Label Grid.Row="2" Grid.Column="1" Text="$240 total" FontSize="14" FontAttributes="Bold" TextColor="#4CAF50"/>
+                            <Border Grid.Column="2"
+                                    StrokeThickness="0"
+                                    BackgroundColor="#E8F5E9"
+                                    Padding="8,4"
+                                    VerticalOptions="Start">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Label Text="✓ Verificada" FontSize="10" 
+                                       TextColor="#2E7D32" FontAttributes="Bold"/>
+                            </Border>
                         </Grid>
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,5,0,0">
-                            <Button Grid.Column="0" 
-                                    Text="Rechazar"
+                        <BoxView HeightRequest="1" BackgroundColor="#F5F5F5" Margin="15,0"/>
+
+                        <VerticalStackLayout Padding="15" Spacing="8">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="🚐" FontSize="14"/>
+                                <Label Grid.Column="1" Text="Honda CR-V 2024" 
+                                       FontSize="13" TextColor="#212121" VerticalOptions="Center"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="📅" FontSize="14"/>
+                                <Label Grid.Column="1" Text="25 - 30 Mayo 2026 (5 días)" 
+                                       FontSize="13" TextColor="#212121" VerticalOptions="Center"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="💰" FontSize="14"/>
+                                <Label Grid.Column="1" Text="Total a recibir" 
+                                       FontSize="13" TextColor="#9E9E9E" VerticalOptions="Center"/>
+                                <Label Grid.Column="2" Text="$240" 
+                                       FontSize="16" FontAttributes="Bold" 
+                                       TextColor="#43A047" VerticalOptions="Center"/>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <Grid BackgroundColor="#FAFAFA"
+                              Padding="15,12"
+                              ColumnDefinitions="*,*"
+                              ColumnSpacing="10">
+                            <Border Grid.Column="0"
+                                    StrokeThickness="2"
+                                    Stroke="#F44336"
                                     BackgroundColor="Transparent"
-                                    TextColor="#F44336"
-                                    BorderColor="#F44336"
-                                    BorderWidth="2"
-                                    CornerRadius="10"
-                                    HeightRequest="45"
-                                    FontSize="14"
-                                    FontAttributes="Bold"
-                                    Clicked="OnRejectClicked"/>
-                            <Button Grid.Column="1" 
-                                    Text="Aceptar"
-                                    BackgroundColor="#4CAF50"
-                                    TextColor="White"
-                                    CornerRadius="10"
-                                    HeightRequest="45"
-                                    FontSize="14"
-                                    FontAttributes="Bold"
-                                    Clicked="OnAcceptClicked"/>
+                                    HeightRequest="42">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Button Text="✕ Rechazar"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#F44336"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        Clicked="OnRejectClicked"/>
+                            </Border>
+                            <Border Grid.Column="1"
+                                    StrokeThickness="0"
+                                    HeightRequest="42">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#43A047" Offset="0.0"/>
+                                        <GradientStop Color="#2E7D32" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Button Text="✓ Aceptar"
+                                        BackgroundColor="Transparent"
+                                        TextColor="White"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        Clicked="OnAcceptClicked"/>
+                            </Border>
                         </Grid>
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
-                <!-- Activas -->
-                <Label Text="Rentas Activas" 
-                       FontSize="18" 
-                       FontAttributes="Bold"
-                       TextColor="#212121"
-                       Margin="0,15,0,5"/>
+                <!-- Sección Activas -->
+                <Grid Margin="20,15,20,5" ColumnDefinitions="Auto,*">
+                    <Label Grid.Column="0" Text="🟢" FontSize="14" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" 
+                           Text="EN CURSO" 
+                           FontSize="12" 
+                           FontAttributes="Bold"
+                           TextColor="#388E3C"
+                           CharacterSpacing="2"
+                           Margin="6,0,0,0"
+                           VerticalOptions="Center"/>
+                </Grid>
 
-                <Frame CornerRadius="15" 
-                       HasShadow="True"
-                       BackgroundColor="White"
-                       Padding="15">
-                    <VerticalStackLayout Spacing="12">
-                        <HorizontalStackLayout Spacing="15">
-                            <Frame WidthRequest="60" HeightRequest="60" CornerRadius="30" Padding="0" BackgroundColor="#FFF3E0" HasShadow="False">
-                                <Label Text="👤" FontSize="30" HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Frame>
-                            <VerticalStackLayout Spacing="5" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                                <Label Text="Luis Martínez" FontSize="16" FontAttributes="Bold" TextColor="#212121"/>
-                                <Label Text="Honda CR-V 2024" FontSize="13" TextColor="#757575"/>
+                <Border Margin="20,5,20,30"
+                        StrokeThickness="0"
+                        BackgroundColor="White">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16"/>
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.1" Radius="10" Offset="0,3"/>
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="0">
+                        <Grid Padding="15" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border Grid.Column="0"
+                                    WidthRequest="50" HeightRequest="50"
+                                    StrokeThickness="2"
+                                    Stroke="#FFF3E0"
+                                    BackgroundColor="#FF9800"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="25"/>
+                                </Border.StrokeShape>
+                                <Label Text="LM" FontSize="16" 
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       HorizontalOptions="Center" 
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                <Label Text="Luis Martínez" FontSize="14" 
+                                       FontAttributes="Bold" TextColor="#212121"/>
+                                <Label Text="Honda CR-V 2024" FontSize="11" TextColor="#9E9E9E"/>
                             </VerticalStackLayout>
-                            <Frame Padding="8,4" CornerRadius="8" BackgroundColor="#E8F5E9" HasShadow="False" VerticalOptions="Center">
-                                <Label Text="En curso" FontSize="11" TextColor="#4CAF50" FontAttributes="Bold"/>
-                            </Frame>
-                        </HorizontalStackLayout>
+                            <Border Grid.Column="2"
+                                    StrokeThickness="0"
+                                    BackgroundColor="#E8F5E9"
+                                    Padding="8,4"
+                                    VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Label Text="🟢 En curso" FontSize="10" 
+                                       TextColor="#388E3C" FontAttributes="Bold"/>
+                            </Border>
+                        </Grid>
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
-                            <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                <Label Text="Inicio" FontSize="11" TextColor="#757575"/>
-                                <Label Text="15 May" FontSize="13" FontAttributes="Bold" TextColor="#212121"/>
+                        <BoxView HeightRequest="1" BackgroundColor="#F5F5F5" Margin="15,0"/>
+
+                        <Grid Padding="15" ColumnDefinitions="*,Auto,*" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="INICIO" FontSize="9" 
+                                       TextColor="#9E9E9E" FontAttributes="Bold"/>
+                                <Label Text="15 May" FontSize="13" 
+                                       FontAttributes="Bold" TextColor="#212121"/>
                             </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                <Label Text="Fin" FontSize="11" TextColor="#757575"/>
-                                <Label Text="18 May" FontSize="13" FontAttributes="Bold" TextColor="#212121"/>
+                            <Label Grid.Column="1" Text="→" FontSize="18" 
+                                   TextColor="#BDBDBD" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="2" Spacing="2">
+                                <Label Text="FIN" FontSize="9" 
+                                       TextColor="#9E9E9E" FontAttributes="Bold"/>
+                                <Label Text="18 May" FontSize="13" 
+                                       FontAttributes="Bold" TextColor="#212121"/>
                             </VerticalStackLayout>
                         </Grid>
 
-                        <Button Text="Ver Detalles"
-                                BackgroundColor="Transparent"
-                                TextColor="#1E88E5"
-                                FontSize="14"
-                                FontAttributes="Bold"
-                                Clicked="OnViewDetailsClicked"/>
+                        <Grid BackgroundColor="#FAFAFA" Padding="15,10">
+                            <Button Text="📋 Ver Detalles"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#1E88E5"
+                                    FontSize="13"
+                                    FontAttributes="Bold"
+                                    Clicked="OnViewDetailsClicked"/>
+                        </Grid>
                     </VerticalStackLayout>
-                </Frame>
+                </Border>
 
             </VerticalStackLayout>
         </ScrollView>
-
     </Grid>
 
 </ContentPage>

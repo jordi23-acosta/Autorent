@@ -8,6 +8,7 @@ namespace AUTORENT.ViewModels
         public string ImageSource { get; set; } = "";
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";
+        public string Emoji { get; set; } = "";
     }
 
     public class WelcomeViewModel : BaseViewModel
@@ -23,26 +24,30 @@ namespace AUTORENT.ViewModels
                 new OnboardingItem
                 {
                     ImageSource = "onboarding_1.png",
-                    Title = "Encuentra. Reserva. Estaciona.",
-                    Description = "Localiza lugares disponibles cerca de ti en tiempo real."
+                    Emoji = "🚗",
+                    Title = "Encuentra el auto perfecto",
+                    Description = "Explora cientos de vehículos disponibles cerca de ti."
                 },
                 new OnboardingItem
                 {
                     ImageSource = "onboarding_2.png",
-                    Title = "Renta tu auto ideal",
-                    Description = "Miles de vehículos disponibles con entrega a domicilio."
-                },
-                new OnboardingItem
-                {
-                    ImageSource = "onboarding_3.png",
-                    Title = "Reserva en segundos",
+                    Emoji = "🔍",
+                    Title = "Renta en segundos",
                     Description = "Proceso rápido y seguro desde tu celular."
                 },
                 new OnboardingItem
                 {
+                    ImageSource = "onboarding_3.png",
+                    Emoji = "📅",
+                    Title = "Reserva con confianza",
+                    Description = "Confirmación inmediata y entrega flexible."
+                },
+                new OnboardingItem
+                {
                     ImageSource = "onboarding_4.png",
+                    Emoji = "💰",
                     Title = "Gana dinero con tu auto",
-                    Description = "Renta tu vehículo y genera ingresos extra de forma segura."
+                    Description = "Publica tu vehículo y genera ingresos extra."
                 }
             };
 
@@ -50,8 +55,8 @@ namespace AUTORENT.ViewModels
             
             LoginCommand = new AsyncRelayCommand(NavigateToLoginAsync);
             RegisterCommand = new AsyncRelayCommand(NavigateToRegisterAsync);
-
-            StartAutoPlay();
+            SkipCommand = new AsyncRelayCommand(NavigateToLoginAsync);
+            NextCommand = new RelayCommand(NextSlide);
         }
 
         public ObservableCollection<OnboardingItem> Items
@@ -70,6 +75,9 @@ namespace AUTORENT.ViewModels
                     OnPropertyChanged(nameof(CurrentTitle));
                     OnPropertyChanged(nameof(CurrentDescription));
                     OnPropertyChanged(nameof(CurrentImageSource));
+                    OnPropertyChanged(nameof(CurrentEmoji));
+                    OnPropertyChanged(nameof(IsLastSlide));
+                    OnPropertyChanged(nameof(SlideNumber));
                 }
             }
         }
@@ -77,10 +85,15 @@ namespace AUTORENT.ViewModels
         public string CurrentTitle => Items[CurrentIndex].Title;
         public string CurrentDescription => Items[CurrentIndex].Description;
         public string CurrentImageSource => Items[CurrentIndex].ImageSource;
+        public string CurrentEmoji => Items[CurrentIndex].Emoji;
         public int ItemsCount => Items.Count;
+        public bool IsLastSlide => CurrentIndex == Items.Count - 1;
+        public string SlideNumber => $"{CurrentIndex + 1} / {Items.Count}";
 
         public ICommand LoginCommand { get; }
         public ICommand RegisterCommand { get; }
+        public ICommand SkipCommand { get; }
+        public ICommand NextCommand { get; }
 
         public void StartAutoPlay()
         {
@@ -96,20 +109,59 @@ namespace AUTORENT.ViewModels
         public void StopAutoPlay()
         {
             _autoPlayTimer?.Dispose();
+            _autoPlayTimer = null;
+        }
+
+        private void NextSlide()
+        {
+            if (CurrentIndex < Items.Count - 1)
+            {
+                CurrentIndex++;
+            }
+            else
+            {
+                _ = NavigateToRegisterAsync();
+            }
         }
 
         private async Task NavigateToLoginAsync()
         {
-            _autoPlayTimer?.Dispose();
+            StopAutoPlay();
             Preferences.Set("HasSeenOnboarding", true);
-            await Shell.Current.GoToAsync("//LoginPage");
+
+            try
+            {
+                if (Application.Current != null)
+                {
+                    Application.Current.MainPage = new NavigationPage(new LoginPage());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navegando a Login: {ex.Message}");
+            }
+
+            await Task.CompletedTask;
         }
 
         private async Task NavigateToRegisterAsync()
         {
-            _autoPlayTimer?.Dispose();
+            StopAutoPlay();
             Preferences.Set("HasSeenOnboarding", true);
-            await Shell.Current.GoToAsync("//LoginPage");
+
+            try
+            {
+                if (Application.Current != null)
+                {
+                    var navPage = new NavigationPage(new LoginPage());
+                    Application.Current.MainPage = navPage;
+                    await navPage.PushAsync(new RegisterPage());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navegando a Register: {ex.Message}");
+            }
         }
     }
 }

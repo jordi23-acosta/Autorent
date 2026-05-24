@@ -14,6 +14,12 @@ public partial class WelcomePage : ContentPage
 
         BuildDots();
         _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        UpdateBackgroundImage();
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
         _viewModel.StartAutoPlay();
     }
 
@@ -22,8 +28,17 @@ public partial class WelcomePage : ContentPage
         if (e.PropertyName == nameof(_viewModel.CurrentIndex))
         {
             UpdateDots(_viewModel.CurrentIndex);
+            UpdateBackgroundImage();
+        }
+    }
+
+    private void UpdateBackgroundImage()
+    {
+        try
+        {
             BackgroundImage.Source = _viewModel.CurrentImageSource;
         }
+        catch { }
     }
 
     private void BuildDots()
@@ -31,14 +46,22 @@ public partial class WelcomePage : ContentPage
         DotsContainer.Children.Clear();
         for (int i = 0; i < _viewModel.ItemsCount; i++)
         {
-            DotsContainer.Children.Add(new BoxView
+            var isActive = i == _viewModel.CurrentIndex;
+            var dot = new Border
             {
-                WidthRequest = 8,
+                WidthRequest = isActive ? 24 : 8,
                 HeightRequest = 8,
-                CornerRadius = 4,
-                Color = i == 0 ? Color.FromArgb("#00E5CC") : Color.FromArgb("#60FFFFFF"),
+                StrokeThickness = 0,
+                BackgroundColor = isActive 
+                    ? Color.FromArgb("#00E5CC") 
+                    : Color.FromArgb("#60FFFFFF"),
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle 
+                { 
+                    CornerRadius = 4 
+                },
                 VerticalOptions = LayoutOptions.Center
-            });
+            };
+            DotsContainer.Children.Add(dot);
         }
     }
 
@@ -46,10 +69,14 @@ public partial class WelcomePage : ContentPage
     {
         for (int i = 0; i < DotsContainer.Children.Count; i++)
         {
-            if (DotsContainer.Children[i] is BoxView dot)
-                dot.Color = i == activeIndex
+            if (DotsContainer.Children[i] is Border dot)
+            {
+                bool isActive = i == activeIndex;
+                dot.WidthRequest = isActive ? 24 : 8;
+                dot.BackgroundColor = isActive
                     ? Color.FromArgb("#00E5CC")
                     : Color.FromArgb("#60FFFFFF");
+            }
         }
     }
 

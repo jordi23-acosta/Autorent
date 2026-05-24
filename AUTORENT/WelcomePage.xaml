@@ -5,89 +5,185 @@
              x:Class="AUTORENT.WelcomePage"
              x:DataType="viewmodels:WelcomeViewModel"
              NavigationPage.HasNavigationBar="False"
-             BackgroundColor="Black">
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#0D47A1">
 
     <Grid>
-        
+
         <!-- Imagen de fondo a pantalla completa -->
         <Image x:Name="BackgroundImage"
                Aspect="AspectFill"
                HorizontalOptions="Fill"
                VerticalOptions="Fill"/>
 
-        <!-- Degradado oscuro fijo -->
+        <!-- Degradado superior (para "Saltar") -->
+        <BoxView HorizontalOptions="Fill"
+                 HeightRequest="120"
+                 VerticalOptions="Start"
+                 InputTransparent="True">
+            <BoxView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#80000000" Offset="0.0" />
+                    <GradientStop Color="Transparent" Offset="1.0" />
+                </LinearGradientBrush>
+            </BoxView.Background>
+        </BoxView>
+
+        <!-- Degradado oscuro inferior (para legibilidad) -->
         <BoxView HorizontalOptions="Fill"
                  VerticalOptions="Fill"
                  InputTransparent="True">
             <BoxView.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                     <GradientStop Color="Transparent" Offset="0.0" />
-                    <GradientStop Color="#55000000" Offset="0.45" />
-                    <GradientStop Color="#CC000000" Offset="1.0" />
+                    <GradientStop Color="#33000000" Offset="0.4" />
+                    <GradientStop Color="#CC0D47A1" Offset="0.85" />
+                    <GradientStop Color="#FF0D47A1" Offset="1.0" />
                 </LinearGradientBrush>
             </BoxView.Background>
         </BoxView>
 
         <!-- Contenido superpuesto -->
-        <Grid RowDefinitions="*,Auto,Auto,Auto" Padding="30,60,30,40">
-            
-            <BoxView Grid.Row="0" Color="Transparent" InputTransparent="True"/>
-            
-            <VerticalStackLayout Grid.Row="1" Spacing="12" Margin="0,0,0,30">
+        <Grid RowDefinitions="Auto,*,Auto,Auto,Auto" Padding="25,55,25,30">
+
+            <!-- Header: Skip & Slide indicator -->
+            <Grid Grid.Row="0" 
+                  ColumnDefinitions="Auto,*,Auto"
+                  VerticalOptions="Start">
+
+                <!-- Logo / Brand -->
+                <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
+                    <Label Text="🚗" 
+                           FontSize="22" 
+                           VerticalOptions="Center"/>
+                    <Label Text="AUTORENT" 
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           CharacterSpacing="2"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+
+                <!-- Skip button -->
+                <Border Grid.Column="2"
+                        StrokeThickness="0"
+                        BackgroundColor="#33FFFFFF"
+                        Padding="14,7"
+                        VerticalOptions="Center">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14"/>
+                    </Border.StrokeShape>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SkipCommand}"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="5">
+                        <Label Text="Saltar" 
+                               TextColor="White" 
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"/>
+                        <Label Text="→" 
+                               TextColor="White" 
+                               FontSize="14"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Espacio central (para que la imagen se vea) -->
+            <BoxView Grid.Row="1" Color="Transparent" InputTransparent="True"/>
+
+            <!-- Emoji grande del slide actual -->
+            <Border Grid.Row="2"
+                    WidthRequest="80"
+                    HeightRequest="80"
+                    StrokeThickness="0"
+                    BackgroundColor="#33FFFFFF"
+                    HorizontalOptions="Start"
+                    Margin="0,0,0,15">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20"/>
+                </Border.StrokeShape>
+                <Label Text="{Binding CurrentEmoji}"
+                       FontSize="40"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"/>
+            </Border>
+
+            <!-- Texto y dots -->
+            <VerticalStackLayout Grid.Row="3" 
+                                 Spacing="12" 
+                                 Margin="0,0,0,25">
                 <Label x:Name="TitleLabel"
                        Text="{Binding CurrentTitle}"
-                       FontSize="42" 
+                       FontSize="32" 
                        FontAttributes="Bold"
                        TextColor="White"
                        LineBreakMode="WordWrap"
                        HorizontalTextAlignment="Start"
-                       LineHeight="1.1"
+                       LineHeight="1.15"
                        CharacterSpacing="0.3"/>
 
                 <Label x:Name="DescriptionLabel"
                        Text="{Binding CurrentDescription}"
-                       FontSize="16"
-                       TextColor="#E0E0E0"
+                       FontSize="15"
+                       TextColor="#E3F2FD"
                        LineBreakMode="WordWrap"
                        HorizontalTextAlignment="Start"
                        LineHeight="1.4"
-                       Opacity="0.9"/>
+                       Opacity="0.95"/>
+
+                <!-- Dots indicators -->
+                <HorizontalStackLayout x:Name="DotsContainer"
+                                       Spacing="6"
+                                       Margin="0,15,0,0"/>
             </VerticalStackLayout>
 
-            <HorizontalStackLayout Grid.Row="2"
-                                   x:Name="DotsContainer"
-                                   Spacing="8"
-                                   Margin="0,0,0,25"/>
-            
-            <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="15">
-                
+            <!-- Botones -->
+            <Grid Grid.Row="4" 
+                  ColumnDefinitions="*,*" 
+                  ColumnSpacing="12">
+
+                <!-- Iniciar sesión -->
                 <Border Grid.Column="0"
                         StrokeThickness="2"
                         Stroke="White"
-                        HeightRequest="56"
-                        BackgroundColor="Transparent">
+                        HeightRequest="54"
+                        BackgroundColor="#22FFFFFF">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="28"/>
+                        <RoundRectangle CornerRadius="27"/>
                     </Border.StrokeShape>
                     <Button Text="Iniciar sesión"
                             BackgroundColor="Transparent"
                             TextColor="White"
-                            FontSize="16"
+                            FontSize="15"
                             FontAttributes="Bold"
                             Command="{Binding LoginCommand}"/>
                 </Border>
-                
+
+                <!-- Registrarse -->
                 <Border Grid.Column="1"
                         StrokeThickness="0"
-                        HeightRequest="56"
-                        BackgroundColor="#00E5CC">
+                        HeightRequest="54">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="28"/>
+                        <RoundRectangle CornerRadius="27"/>
                     </Border.StrokeShape>
-                    <Button Text="Registrarse"
+                    <Border.Shadow>
+                        <Shadow Brush="#00E5CC" 
+                                Opacity="0.5" 
+                                Radius="15" 
+                                Offset="0,4"/>
+                    </Border.Shadow>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#00E5CC" Offset="0.0"/>
+                            <GradientStop Color="#00BFA5" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Button Text="Comenzar →"
                             BackgroundColor="Transparent"
-                            TextColor="#000000"
-                            FontSize="16"
+                            TextColor="#0D47A1"
+                            FontSize="15"
                             FontAttributes="Bold"
                             Command="{Binding RegisterCommand}"/>
                 </Border>
