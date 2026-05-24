@@ -12,10 +12,10 @@ namespace AUTORENT
             BindingContext = new ProfileViewModel();
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
-            ViewModel.LoadUserData();
+            await ViewModel.LoadUserData();
         }
     }
 }

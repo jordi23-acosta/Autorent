@@ -23,6 +23,7 @@
             Route="RentalsPage" />
 
         <ShellContent
+            x:Name="MyVehiclesTab"
             Title="Mis Autos"
             Icon="tab_cars.svg"
             ContentTemplate="{DataTemplate pages:MyVehiclesPage}"

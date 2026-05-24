@@ -33,11 +33,8 @@ namespace AUTORENT.ViewModels
             HelpCommand = new AsyncRelayCommand(ShowHelpAsync);
             AboutCommand = new AsyncRelayCommand(ShowAboutAsync);
 
-            // Suscribirse a cambios de tema
-            ThemeService.Instance.ThemeChanged += (s, theme) => OnPropertyChanged(nameof(IsDarkMode));
-
-            LoadUserData();
-            LoadDarkModePreference();
+            // Cargar datos del usuario y estadísticas
+            _ = LoadUserData();
             _ = LoadStatsAsync();
         }
 
@@ -127,9 +124,17 @@ namespace AUTORENT.ViewModels
         public ICommand HelpCommand { get; }
         public ICommand AboutCommand { get; }
 
-        public void LoadUserData()
+        public async Task LoadUserData()
         {
             var user = _authService.CurrentUser;
+            
+            // Si no hay usuario o falta info, recargar desde Supabase
+            if (user == null || string.IsNullOrWhiteSpace(user.Name))
+            {
+                await ReloadUserFromDatabaseAsync();
+                user = _authService.CurrentUser;
+            }
+            
             if (user != null)
             {
                 UserName = user.Name;
@@ -139,6 +144,37 @@ namespace AUTORENT.ViewModels
                 UserRole = IsOwner ? "Propietario" : "Conductor";
                 MemberSince = $"Miembro desde {user.CreatedAt:MMMM yyyy}";
                 UpdateInitials();
+            }
+        }
+
+        private async Task ReloadUserFromDatabaseAsync()
+        {
+            try
+            {
+                var client = _authService.GetClient();
+                if (client?.Auth.CurrentUser == null) return;
+
+                var userId = client.Auth.CurrentUser.Id;
+
+                var response = await client
+                    .From<Profile>()
+                    .Where(x => x.Id == userId)
+                    .Single();
+
+                if (response != null && _authService.CurrentUser != null)
+                {
+                    _authService.CurrentUser.Name = response.FullName;
+                    _authService.CurrentUser.Email = response.Email;
+                    _authService.CurrentUser.Phone = response.Phone ?? string.Empty;
+                    _authService.CurrentUser.Role = response.UserType == "propietario" 
+                        ? Models.UserRole.Owner 
+                        : Models.UserRole.Driver;
+                    _authService.CurrentUser.CreatedAt = response.CreatedAt;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error recargando perfil: {ex.Message}");
             }
         }
 
