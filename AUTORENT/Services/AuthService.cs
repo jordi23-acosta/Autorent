@@ -144,9 +144,9 @@ namespace AUTORENT.Services
                     return (false, "Error al crear la cuenta", null);
 
                 // Esperar un momento para que el trigger cree el perfil
-                await Task.Delay(1000);
+                await Task.Delay(1500);
 
-                // Verificar si el perfil existe
+                // Verificar si el perfil existe e insertar/actualizar con todos los datos
                 try
                 {
                     var profileCheck = await _supabaseClient
@@ -158,14 +158,26 @@ namespace AUTORENT.Services
 
                     if (profileCheck?.Models?.Count > 0)
                     {
-                        // Actualizar el perfil con el teléfono
-                        var profileUpdate = await _supabaseClient
+                        // El trigger creó el perfil, actualizarlo con teléfono y user_type
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Actualizando teléfono: '{phone}'");
+                        
+                        var updateResponse = await _supabaseClient
                             .From<Profile>()
                             .Where(x => x.Id == session.User.Id)
-                            .Set(x => x.Phone!, phone)
+                            .Set(x => x.Phone, phone)
+                            .Set(x => x.UserType, userType)
+                            .Set(x => x.UpdatedAt, DateTime.UtcNow)
                             .Update();
 
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Perfil actualizado con teléfono");
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Perfil actualizado con teléfono y tipo");
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Modelos actualizados: {updateResponse?.Models?.Count ?? 0}");
+                        
+                        if (updateResponse?.Models?.Count > 0)
+                        {
+                            var updated = updateResponse.Models[0];
+                            System.Diagnostics.Debug.WriteLine($"[REGISTRO] Teléfono guardado: '{updated.Phone}'");
+                            System.Diagnostics.Debug.WriteLine($"[REGISTRO] Tipo guardado: '{updated.UserType}'");
+                        }
                     }
                     else
                     {
@@ -184,7 +196,7 @@ namespace AUTORENT.Services
                         };
 
                         await _supabaseClient.From<Profile>().Insert(newProfile);
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Perfil creado manualmente");
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Perfil creado manualmente con teléfono: '{phone}'");
                     }
                 }
                 catch (Exception profileEx)
