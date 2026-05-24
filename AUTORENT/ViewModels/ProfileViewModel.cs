@@ -319,7 +319,7 @@ namespace AUTORENT.ViewModels
                         await client
                             .From<Profile>()
                             .Where(x => x.Id == user.Id)
-                            .Set(x => x.Phone!, phone)
+                            .Set(x => x.Phone, phone)
                             .Set(x => x.UpdatedAt, DateTime.UtcNow)
                             .Update();
 

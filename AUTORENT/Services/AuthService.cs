@@ -143,67 +143,44 @@ namespace AUTORENT.Services
                 if (session?.User == null)
                     return (false, "Error al crear la cuenta", null);
 
-                // Esperar un momento para que el trigger cree el perfil
-                await Task.Delay(1500);
+                // Esperar para que el trigger cree el perfil
+                await Task.Delay(2000);
 
-                // Verificar si el perfil existe e insertar/actualizar con todos los datos
+                // Estrategia: Intentar actualizar primero, si falla por que no existe, crearlo
+                System.Diagnostics.Debug.WriteLine($"[REGISTRO] Guardando teléfono: '{phone}', tipo: '{userType}'");
+                
+                bool profileSaved = false;
+                
+                // Intento 1: Actualizar el perfil que el trigger debió crear
                 try
                 {
-                    var profileCheck = await _supabaseClient
+                    var updateResponse = await _supabaseClient
                         .From<Profile>()
                         .Where(x => x.Id == session.User.Id)
-                        .Get();
+                        .Set(x => x.Phone, phone)
+                        .Set(x => x.UserType, userType)
+                        .Set(x => x.FullName, fullName)
+                        .Set(x => x.UpdatedAt, DateTime.UtcNow)
+                        .Update();
 
-                    System.Diagnostics.Debug.WriteLine($"[REGISTRO] Perfiles encontrados: {profileCheck?.Models?.Count ?? 0}");
-
-                    if (profileCheck?.Models?.Count > 0)
+                    if (updateResponse?.Models?.Count > 0)
                     {
-                        // El trigger creó el perfil, actualizarlo con teléfono y user_type
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Actualizando teléfono: '{phone}'");
-                        
-                        var updateResponse = await _supabaseClient
-                            .From<Profile>()
-                            .Where(x => x.Id == session.User.Id)
-                            .Set(x => x.Phone, phone)
-                            .Set(x => x.UserType, userType)
-                            .Set(x => x.UpdatedAt, DateTime.UtcNow)
-                            .Update();
-
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Perfil actualizado con teléfono y tipo");
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Modelos actualizados: {updateResponse?.Models?.Count ?? 0}");
-                        
-                        if (updateResponse?.Models?.Count > 0)
-                        {
-                            var updated = updateResponse.Models[0];
-                            System.Diagnostics.Debug.WriteLine($"[REGISTRO] Teléfono guardado: '{updated.Phone}'");
-                            System.Diagnostics.Debug.WriteLine($"[REGISTRO] Tipo guardado: '{updated.UserType}'");
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ADVERTENCIA: No se encontró perfil. Creando manualmente...");
-                        
-                        // Crear perfil manualmente si el trigger no funcionó
-                        var newProfile = new Profile
-                        {
-                            Id = session.User.Id,
-                            Email = email,
-                            FullName = fullName,
-                            Phone = phone,
-                            UserType = userType,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
-                        };
-
-                        await _supabaseClient.From<Profile>().Insert(newProfile);
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Perfil creado manualmente con teléfono: '{phone}'");
+                        var updated = updateResponse.Models[0];
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Perfil actualizado");
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Teléfono guardado: '{updated.Phone}'");
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Tipo guardado: '{updated.UserType}'");
+                        profileSaved = !string.IsNullOrEmpty(updated.Phone);
                     }
                 }
-                catch (Exception profileEx)
+                catch (Exception updateEx)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[REGISTRO] Error con perfil: {profileEx.Message}");
-                    
-                    // Intentar crear perfil manualmente
+                    System.Diagnostics.Debug.WriteLine($"[REGISTRO] Error en update: {updateEx.Message}");
+                }
+
+                // Intento 2: Si el update no guardó el teléfono, intentar insert
+                if (!profileSaved)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[REGISTRO] Update no guardó teléfono, intentando INSERT...");
                     try
                     {
                         var newProfile = new Profile
@@ -217,12 +194,28 @@ namespace AUTORENT.Services
                             UpdatedAt = DateTime.UtcNow
                         };
 
-                        await _supabaseClient.From<Profile>().Insert(newProfile);
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Perfil creado manualmente después de error");
+                        await _supabaseClient.From<Profile>().Upsert(newProfile);
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Perfil creado/actualizado con UPSERT");
+                        profileSaved = true;
                     }
                     catch (Exception insertEx)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Error al crear perfil manualmente: {insertEx.Message}");
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] Error en upsert: {insertEx.Message}");
+                        
+                        // Último intento: Update sin filtros estrictos
+                        try
+                        {
+                            await _supabaseClient
+                                .From<Profile>()
+                                .Where(x => x.Id == session.User.Id)
+                                .Set(x => x.Phone, phone)
+                                .Update();
+                            System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Teléfono guardado en último intento");
+                        }
+                        catch (Exception lastEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[REGISTRO] ❌ Falló todo: {lastEx.Message}");
+                        }
                     }
                 }
 
