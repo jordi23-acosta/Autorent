@@ -458,7 +458,22 @@ namespace AUTORENT.ViewModels
 
         private async Task NavigateToLoginAsync()
         {
-            await Shell.Current.GoToAsync("..");
+            try
+            {
+                if (Application.Current?.MainPage is NavigationPage navPage && navPage.Navigation.NavigationStack.Count > 1)
+                {
+                    await navPage.PopAsync();
+                }
+                else
+                {
+                    Application.Current!.MainPage = new NavigationPage(new LoginPage());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[REGISTER] Error volviendo a Login: {ex.Message}");
+                Application.Current!.MainPage = new NavigationPage(new LoginPage());
+            }
         }
 
         private void DismissError()

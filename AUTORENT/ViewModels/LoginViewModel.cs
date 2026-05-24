@@ -232,7 +232,26 @@ namespace AUTORENT.ViewModels
 
         private async Task NavigateToRegisterAsync()
         {
-            await Shell.Current.GoToAsync("//RegisterPage");
+            try
+            {
+                if (Application.Current?.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PushAsync(new RegisterPage());
+                }
+                else if (Application.Current?.MainPage is Shell shell)
+                {
+                    await shell.GoToAsync("RegisterPage");
+                }
+                else
+                {
+                    Application.Current!.MainPage = new NavigationPage(new RegisterPage());
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LOGIN] Error navegando a Register: {ex.Message}");
+                GeneralError = "Error al abrir el registro";
+            }
         }
 
         private async Task ForgotPasswordAsync()
