@@ -6,8 +6,8 @@
              x:Class="AUTORENT.LoginPage"
              x:DataType="viewmodels:LoginViewModel"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="#F5F5F5">
-    
+             BackgroundColor="#F8F9FA">
+
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:BusyTextConverter x:Key="BusyTextConverter"/>
@@ -16,132 +16,327 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <VerticalStackLayout Spacing="0">
-            
-            <!-- Header con gradiente -->
-            <Grid HeightRequest="320" BackgroundColor="#1E88E5">
+        <Grid RowDefinitions="Auto,*">
+
+            <!-- Header con gradiente moderno -->
+            <Grid Grid.Row="0" HeightRequest="340">
                 <Grid.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Color="#1E88E5" Offset="0.0" />
-                        <GradientStop Color="#1565C0" Offset="1.0" />
+                        <GradientStop Color="#1565C0" Offset="0.5" />
+                        <GradientStop Color="#0D47A1" Offset="1.0" />
                     </LinearGradientBrush>
                 </Grid.Background>
-                
-                <VerticalStackLayout VerticalOptions="Center" Spacing="15">
-                    <!-- Logo SVG -->
-                    <Image Source="autorent_logo.svg"
-                           HeightRequest="110"
-                           WidthRequest="110"
-                           HorizontalOptions="Center"/>
+
+                <!-- Círculos decorativos de fondo -->
+                <Ellipse Fill="#FFFFFF" 
+                         Opacity="0.1"
+                         WidthRequest="200" 
+                         HeightRequest="200"
+                         HorizontalOptions="End"
+                         VerticalOptions="Start"
+                         Margin="0,-50,-50,0"/>
+                <Ellipse Fill="#FFFFFF" 
+                         Opacity="0.08"
+                         WidthRequest="150" 
+                         HeightRequest="150"
+                         HorizontalOptions="Start"
+                         VerticalOptions="End"
+                         Margin="-30,0,0,-30"/>
+
+                <VerticalStackLayout VerticalOptions="Center" Spacing="12" Padding="20">
+                    <!-- Logo con sombra -->
+                    <Border StrokeThickness="0"
+                            BackgroundColor="White"
+                            HeightRequest="100"
+                            WidthRequest="100"
+                            HorizontalOptions="Center"
+                            Padding="15">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="25"/>
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="Black" 
+                                    Opacity="0.3" 
+                                    Radius="15" 
+                                    Offset="0,5"/>
+                        </Border.Shadow>
+                        <Image Source="autorent_logo.svg"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </Border>
+                    
                     <Label Text="AUTORENT" 
                            FontSize="36" 
                            FontAttributes="Bold"
                            TextColor="White"
-                           HorizontalOptions="Center"/>
+                           HorizontalOptions="Center"
+                           CharacterSpacing="3"/>
                     <Label Text="Tu plataforma de renta de autos" 
-                           FontSize="16"
+                           FontSize="14"
                            TextColor="#E3F2FD"
                            HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Grid>
 
-            <!-- Formulario de Login -->
-            <Frame Margin="20,-50,20,20" 
-                   Padding="25"
-                   CornerRadius="20"
-                   HasShadow="True"
-                   BackgroundColor="White">
-                <VerticalStackLayout Spacing="20">
-                    
-                    <Label Text="Iniciar Sesión" 
-                           FontSize="24" 
-                           FontAttributes="Bold"
-                           TextColor="#212121"
-                           HorizontalOptions="Center"
-                           Margin="0,0,0,10"/>
+            <!-- Tarjeta del formulario flotante -->
+            <Border Grid.Row="1"
+                    Margin="20,-60,20,30"
+                    Padding="0"
+                    StrokeThickness="0"
+                    BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20"/>
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="Black" 
+                            Opacity="0.15" 
+                            Radius="20" 
+                            Offset="0,5"/>
+                </Border.Shadow>
 
-                    <!-- Email -->
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="Email" 
-                               FontSize="14" 
+                <VerticalStackLayout Spacing="18" Padding="25,30">
+
+                    <!-- Título de bienvenida -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="¡Bienvenido!" 
+                               FontSize="28" 
+                               FontAttributes="Bold"
+                               TextColor="#212121"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Inicia sesión para continuar" 
+                               FontSize="14"
                                TextColor="#757575"
-                               FontAttributes="Bold"/>
-                        <Frame Padding="0" 
-                               CornerRadius="10" 
-                               BorderColor="#E0E0E0"
-                               HasShadow="False">
-                            <Entry Text="{Binding Email}"
-                                   Placeholder="tu@email.com"
-                                   Keyboard="Email"
-                                   TextColor="#212121"
-                                   PlaceholderColor="#9E9E9E"
-                                   Margin="15,0"/>
-                        </Frame>
+                               HorizontalOptions="Center"/>
                     </VerticalStackLayout>
 
-                    <!-- Password -->
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="Contraseña" 
-                               FontSize="14" 
-                               TextColor="#757575"
+                    <!-- Alerta de error general -->
+                    <Border IsVisible="{Binding HasGeneralError}"
+                            BackgroundColor="#FFEBEE"
+                            Stroke="#F44336"
+                            StrokeThickness="1"
+                            Padding="15,12">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="⚠️" 
+                                   FontSize="20"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="{Binding GeneralError}"
+                                   TextColor="#C62828"
+                                   FontSize="13"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                   Text="✕"
+                                   FontSize="16"
+                                   TextColor="#C62828"
+                                   VerticalOptions="Center"
+                                   Padding="5">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding DismissErrorCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+                    </Border>
+
+                    <!-- Campo Email -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Email" 
+                               FontSize="13" 
+                               TextColor="#424242"
                                FontAttributes="Bold"/>
-                        <Frame Padding="0" 
-                               CornerRadius="10" 
-                               BorderColor="#E0E0E0"
-                               HasShadow="False">
-                            <Grid ColumnDefinitions="*,Auto" Margin="15,0">
-                                <Entry Grid.Column="0"
+                        <Border Padding="0"
+                                StrokeThickness="1.5"
+                                BackgroundColor="#FAFAFA">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding HasEmailError}" 
+                                             Value="True">
+                                    <Setter Property="Stroke" Value="#F44336"/>
+                                    <Setter Property="BackgroundColor" Value="#FFEBEE"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding IsEmailValid}" 
+                                             Value="True">
+                                    <Setter Property="Stroke" Value="#4CAF50"/>
+                                    <Setter Property="BackgroundColor" Value="#F1F8E9"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding HasEmailError}" 
+                                             Value="False">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" Padding="15,0">
+                                <Label Grid.Column="0"
+                                       Text="📧" 
+                                       FontSize="18"
+                                       VerticalOptions="Center"
+                                       Margin="0,0,10,0"/>
+                                <Entry Grid.Column="1"
+                                       Text="{Binding Email}"
+                                       Placeholder="tu@email.com"
+                                       Keyboard="Email"
+                                       TextColor="#212121"
+                                       PlaceholderColor="#9E9E9E"
+                                       BackgroundColor="Transparent"
+                                       FontSize="15"/>
+                                <Label Grid.Column="2"
+                                       Text="✓"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="#4CAF50"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding IsEmailValid}"/>
+                            </Grid>
+                        </Border>
+                        <Label Text="{Binding EmailError}"
+                               FontSize="12"
+                               TextColor="#F44336"
+                               IsVisible="{Binding HasEmailError}"
+                               Margin="5,0,0,0"/>
+                    </VerticalStackLayout>
+
+                    <!-- Campo Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Contraseña" 
+                               FontSize="13" 
+                               TextColor="#424242"
+                               FontAttributes="Bold"/>
+                        <Border Padding="0"
+                                StrokeThickness="1.5"
+                                BackgroundColor="#FAFAFA">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding HasPasswordError}" 
+                                             Value="True">
+                                    <Setter Property="Stroke" Value="#F44336"/>
+                                    <Setter Property="BackgroundColor" Value="#FFEBEE"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding IsPasswordValid}" 
+                                             Value="True">
+                                    <Setter Property="Stroke" Value="#4CAF50"/>
+                                    <Setter Property="BackgroundColor" Value="#F1F8E9"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding HasPasswordError}" 
+                                             Value="False">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" Padding="15,0">
+                                <Label Grid.Column="0"
+                                       Text="🔒" 
+                                       FontSize="18"
+                                       VerticalOptions="Center"
+                                       Margin="0,0,10,0"/>
+                                <Entry Grid.Column="1"
                                        Text="{Binding Password}"
                                        Placeholder="••••••••"
                                        IsPassword="{Binding IsPasswordVisible, Converter={StaticResource InvertedBoolConverter}}"
                                        TextColor="#212121"
-                                       PlaceholderColor="#9E9E9E"/>
-                                <Button Grid.Column="1"
-                                        Text="{Binding PasswordToggleIcon}"
-                                        Command="{Binding TogglePasswordCommand}"
-                                        FontSize="20"
-                                        BackgroundColor="Transparent"
-                                        TextColor="#666"
-                                        Padding="10,0"/>
+                                       PlaceholderColor="#9E9E9E"
+                                       BackgroundColor="Transparent"
+                                       FontSize="15"/>
+                                <Label Grid.Column="2"
+                                       Text="{Binding PasswordToggleIcon}"
+                                       FontSize="20"
+                                       VerticalOptions="Center"
+                                       Padding="10,0">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding TogglePasswordCommand}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
                             </Grid>
-                        </Frame>
+                        </Border>
+                        <Label Text="{Binding PasswordError}"
+                               FontSize="12"
+                               TextColor="#F44336"
+                               IsVisible="{Binding HasPasswordError}"
+                               Margin="5,0,0,0"/>
                     </VerticalStackLayout>
 
                     <!-- Olvidé mi contraseña -->
                     <Label Text="¿Olvidaste tu contraseña?" 
                            FontSize="13"
+                           FontAttributes="Bold"
                            TextColor="#1E88E5"
                            HorizontalOptions="End"
-                           Margin="0,-10,0,0">
+                           Margin="0,-5,5,0">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}"/>
                         </Label.GestureRecognizers>
                     </Label>
 
                     <!-- Botón de Login -->
-                    <Button Text="{Binding IsBusy, Converter={StaticResource BusyTextConverter}}"
-                            Command="{Binding LoginCommand}"
-                            IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
-                            BackgroundColor="#1E88E5"
-                            TextColor="White"
-                            CornerRadius="10"
+                    <Border StrokeThickness="0"
                             HeightRequest="55"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            Margin="0,10,0,0"/>
+                            Margin="0,10,0,0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="#1565C0" 
+                                    Opacity="0.4" 
+                                    Radius="12" 
+                                    Offset="0,4"/>
+                        </Border.Shadow>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#1E88E5" Offset="0.0"/>
+                                <GradientStop Color="#1565C0" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid>
+                            <Button Text="{Binding IsBusy, Converter={StaticResource BusyTextConverter}}"
+                                    Command="{Binding LoginCommand}"
+                                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="White"
+                                    CornerRadius="14"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    IsVisible="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"/>
+                            <HorizontalStackLayout HorizontalOptions="Center" 
+                                                   VerticalOptions="Center"
+                                                   Spacing="10"
+                                                   IsVisible="{Binding IsBusy}">
+                                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                                   Color="White"
+                                                   HeightRequest="22"
+                                                   WidthRequest="22"/>
+                                <Label Text="Iniciando sesión..."
+                                       TextColor="White"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
 
-                    <!-- Divider -->
+                    <!-- Divider con texto -->
                     <Grid ColumnDefinitions="*,Auto,*" 
-                          ColumnSpacing="10" 
-                          Margin="0,10,0,10">
+                          ColumnSpacing="12" 
+                          Margin="0,15,0,5">
                         <BoxView Grid.Column="0" 
                                  HeightRequest="1" 
                                  BackgroundColor="#E0E0E0"
                                  VerticalOptions="Center"/>
                         <Label Grid.Column="1" 
-                               Text="o" 
-                               TextColor="#757575"
-                               FontSize="14"/>
+                               Text="O"
+                               FontAttributes="Bold"
+                               TextColor="#9E9E9E"
+                               FontSize="13"/>
                         <BoxView Grid.Column="2" 
                                  HeightRequest="1" 
                                  BackgroundColor="#E0E0E0"
@@ -149,21 +344,44 @@
                     </Grid>
 
                     <!-- Botón de Registro -->
-                    <Button Text="Crear Cuenta Nueva"
-                            Command="{Binding NavigateToRegisterCommand}"
+                    <Border StrokeThickness="2"
+                            Stroke="#1E88E5"
                             BackgroundColor="Transparent"
-                            TextColor="#1E88E5"
-                            BorderColor="#1E88E5"
-                            BorderWidth="2"
-                            CornerRadius="10"
-                            HeightRequest="55"
-                            FontSize="16"
-                            FontAttributes="Bold"/>
+                            HeightRequest="55">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Button Text="✨ Crear Cuenta Nueva"
+                                Command="{Binding NavigateToRegisterCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="#1E88E5"
+                                FontSize="16"
+                                FontAttributes="Bold"/>
+                    </Border>
+
+                    <!-- Footer info -->
+                    <Label HorizontalOptions="Center"
+                           Margin="0,10,0,0"
+                           FontSize="12"
+                           TextColor="#9E9E9E">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Al iniciar sesión aceptas nuestros "/>
+                                <Span Text="Términos" 
+                                      TextColor="#1E88E5"
+                                      FontAttributes="Bold"/>
+                                <Span Text=" y "/>
+                                <Span Text="Privacidad" 
+                                      TextColor="#1E88E5"
+                                      FontAttributes="Bold"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
 
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-        </VerticalStackLayout>
+        </Grid>
     </ScrollView>
 
 </ContentPage>

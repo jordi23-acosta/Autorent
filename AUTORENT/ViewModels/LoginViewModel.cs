@@ -1,4 +1,5 @@
 using AUTORENT.Services;
+using System.Text.RegularExpressions;
 using System.Windows.Input;
 
 namespace AUTORENT.ViewModels
@@ -10,6 +11,16 @@ namespace AUTORENT.ViewModels
         private string _password = string.Empty;
         private bool _isPasswordVisible;
         private string _passwordToggleIcon = "👁";
+        
+        // Validation properties
+        private string _emailError = string.Empty;
+        private string _passwordError = string.Empty;
+        private bool _hasEmailError;
+        private bool _hasPasswordError;
+        private bool _isEmailValid;
+        private bool _isPasswordValid;
+        private string _generalError = string.Empty;
+        private bool _hasGeneralError;
 
         public LoginViewModel()
         {
@@ -20,6 +31,7 @@ namespace AUTORENT.ViewModels
             TogglePasswordCommand = new RelayCommand(TogglePassword);
             NavigateToRegisterCommand = new AsyncRelayCommand(NavigateToRegisterAsync);
             ForgotPasswordCommand = new AsyncRelayCommand(ForgotPasswordAsync);
+            DismissErrorCommand = new RelayCommand(DismissError);
         }
 
         public string Email
@@ -29,6 +41,7 @@ namespace AUTORENT.ViewModels
             {
                 if (SetProperty(ref _email, value))
                 {
+                    ValidateEmail();
                     ((AsyncRelayCommand)LoginCommand).RaiseCanExecuteChanged();
                 }
             }
@@ -41,6 +54,7 @@ namespace AUTORENT.ViewModels
             {
                 if (SetProperty(ref _password, value))
                 {
+                    ValidatePassword();
                     ((AsyncRelayCommand)LoginCommand).RaiseCanExecuteChanged();
                 }
             }
@@ -58,16 +72,125 @@ namespace AUTORENT.ViewModels
             set => SetProperty(ref _passwordToggleIcon, value);
         }
 
+        // Validation Properties
+        public string EmailError
+        {
+            get => _emailError;
+            set
+            {
+                if (SetProperty(ref _emailError, value))
+                {
+                    HasEmailError = !string.IsNullOrEmpty(value);
+                }
+            }
+        }
+
+        public string PasswordError
+        {
+            get => _passwordError;
+            set
+            {
+                if (SetProperty(ref _passwordError, value))
+                {
+                    HasPasswordError = !string.IsNullOrEmpty(value);
+                }
+            }
+        }
+
+        public bool HasEmailError
+        {
+            get => _hasEmailError;
+            set => SetProperty(ref _hasEmailError, value);
+        }
+
+        public bool HasPasswordError
+        {
+            get => _hasPasswordError;
+            set => SetProperty(ref _hasPasswordError, value);
+        }
+
+        public bool IsEmailValid
+        {
+            get => _isEmailValid;
+            set => SetProperty(ref _isEmailValid, value);
+        }
+
+        public bool IsPasswordValid
+        {
+            get => _isPasswordValid;
+            set => SetProperty(ref _isPasswordValid, value);
+        }
+
+        public string GeneralError
+        {
+            get => _generalError;
+            set
+            {
+                if (SetProperty(ref _generalError, value))
+                {
+                    HasGeneralError = !string.IsNullOrEmpty(value);
+                }
+            }
+        }
+
+        public bool HasGeneralError
+        {
+            get => _hasGeneralError;
+            set => SetProperty(ref _hasGeneralError, value);
+        }
+
         public ICommand LoginCommand { get; }
         public ICommand TogglePasswordCommand { get; }
         public ICommand NavigateToRegisterCommand { get; }
         public ICommand ForgotPasswordCommand { get; }
+        public ICommand DismissErrorCommand { get; }
+
+        private void ValidateEmail()
+        {
+            if (string.IsNullOrWhiteSpace(_email))
+            {
+                EmailError = string.Empty;
+                IsEmailValid = false;
+                return;
+            }
+
+            var emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            if (!Regex.IsMatch(_email, emailPattern))
+            {
+                EmailError = "Ingresa un email válido";
+                IsEmailValid = false;
+            }
+            else
+            {
+                EmailError = string.Empty;
+                IsEmailValid = true;
+            }
+        }
+
+        private void ValidatePassword()
+        {
+            if (string.IsNullOrWhiteSpace(_password))
+            {
+                PasswordError = string.Empty;
+                IsPasswordValid = false;
+                return;
+            }
+
+            if (_password.Length < 6)
+            {
+                PasswordError = "Mínimo 6 caracteres";
+                IsPasswordValid = false;
+            }
+            else
+            {
+                PasswordError = string.Empty;
+                IsPasswordValid = true;
+            }
+        }
 
         private bool CanLogin()
         {
-            return !string.IsNullOrWhiteSpace(Email) && 
-                   !string.IsNullOrWhiteSpace(Password) && 
-                   !IsBusy;
+            return IsEmailValid && IsPasswordValid && !IsBusy;
         }
 
         private async Task LoginAsync()
@@ -77,6 +200,7 @@ namespace AUTORENT.ViewModels
             try
             {
                 IsBusy = true;
+                GeneralError = string.Empty;
 
                 var (success, message, user) = await _authService.LoginAsync(Email, Password);
 
@@ -87,18 +211,12 @@ namespace AUTORENT.ViewModels
                 }
                 else
                 {
-                    await Application.Current!.MainPage!.DisplayAlert(
-                        "Error de inicio de sesión",
-                        message,
-                        "OK");
+                    GeneralError = message;
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Error",
-                    $"Ocurrió un error: {ex.Message}",
-                    "OK");
+                GeneralError = $"Error: {ex.Message}";
             }
             finally
             {
@@ -121,29 +239,40 @@ namespace AUTORENT.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Email))
             {
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Email requerido",
-                    "Por favor ingresa tu email para recuperar tu contraseña",
-                    "OK");
+                GeneralError = "Por favor ingresa tu email para recuperar tu contraseña";
                 return;
             }
 
-            var result = await _authService.ResetPasswordAsync(Email);
-            
-            if (result)
+            try
             {
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Email enviado",
-                    "Se ha enviado un email con instrucciones para recuperar tu contraseña",
-                    "OK");
+                IsBusy = true;
+                var result = await _authService.ResetPasswordAsync(Email);
+
+                if (result)
+                {
+                    await Application.Current!.MainPage!.DisplayAlert(
+                        "✅ Email enviado",
+                        "Se ha enviado un email con instrucciones para recuperar tu contraseña",
+                        "OK");
+                }
+                else
+                {
+                    GeneralError = "No se pudo enviar el email de recuperación";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert(
-                    "Error",
-                    "No se pudo enviar el email de recuperación",
-                    "OK");
+                GeneralError = $"Error: {ex.Message}";
             }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void DismissError()
+        {
+            GeneralError = string.Empty;
         }
     }
 }
