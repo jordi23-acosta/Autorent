@@ -1,86 +1,486 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:AUTORENT.ViewModels"
+             xmlns:converters="clr-namespace:AUTORENT.Converters"
              x:Class="AUTORENT.MainPage"
              x:Name="MainPageRoot"
-             BackgroundColor="{DynamicResource PageBackground}">
+             x:DataType="viewmodels:MainViewModel"
+             BackgroundColor="#F8F9FA">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="0">
-            
-            <!-- Header con gradiente -->
-            <Grid HeightRequest="280" BackgroundColor="#1E88E5">
-                <Grid.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#1E88E5" Offset="0.0" />
-                        <GradientStop Color="#1565C0" Offset="1.0" />
-                    </LinearGradientBrush>
-                </Grid.Background>
-                
-                <VerticalStackLayout VerticalOptions="Center" Padding="30,20">
-                    <Label Text="🚗" FontSize="60" HorizontalOptions="Center" />
-                    <Label Text="AUTORENT" 
-                           FontSize="32" 
-                           FontAttributes="Bold"
-                           TextColor="White"
-                           HorizontalOptions="Center"
-                           Margin="0,10,0,5"/>
-                    <Label Text="Renta el auto perfecto para tu viaje" 
-                           FontSize="16"
-                           TextColor="#E3F2FD"
-                           HorizontalOptions="Center"
-                           HorizontalTextAlignment="Center"/>
-                </VerticalStackLayout>
-            </Grid>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
-            <!-- Barra de búsqueda -->
-            <Frame Margin="20,-30,20,20" 
-                   Padding="15"
-                   CornerRadius="15"
-                   HasShadow="True"
-                   BackgroundColor="White">
-                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
-                    <Entry Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                           Placeholder="¿Dónde quieres recoger tu auto?"
-                           PlaceholderColor="#9E9E9E"
-                           TextColor="#212121"
-                           FontSize="16"/>
-                    
-                    <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                            Text="Buscar Autos Disponibles"
-                            BackgroundColor="#1E88E5"
-                            TextColor="White"
-                            CornerRadius="10"
-                            HeightRequest="50"
-                            FontAttributes="Bold"
-                            Clicked="OnSearchClicked"/>
+    <RefreshView IsRefreshing="{Binding IsBusy}"
+                 Command="{Binding RefreshCommand}"
+                 RefreshColor="#1E88E5">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Header con gradiente -->
+                <Grid HeightRequest="220">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#1E88E5" Offset="0.0" />
+                            <GradientStop Color="#1565C0" Offset="0.5" />
+                            <GradientStop Color="#0D47A1" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
+
+                    <!-- Círculos decorativos -->
+                    <Ellipse Fill="#FFFFFF" 
+                             Opacity="0.1"
+                             WidthRequest="180" 
+                             HeightRequest="180"
+                             HorizontalOptions="End"
+                             VerticalOptions="Start"
+                             Margin="0,-40,-40,0"/>
+                    <Ellipse Fill="#FFFFFF" 
+                             Opacity="0.08"
+                             WidthRequest="120" 
+                             HeightRequest="120"
+                             HorizontalOptions="Start"
+                             VerticalOptions="End"
+                             Margin="-20,0,0,-20"/>
+
+                    <VerticalStackLayout Padding="25,50,25,20" Spacing="5">
+                        <Label Text="¡Hola!" 
+                               FontSize="16"
+                               TextColor="#E3F2FD"/>
+                        <Label Text="{Binding UserName, StringFormat='👋 {0}'}" 
+                               FontSize="22"
+                               FontAttributes="Bold"
+                               TextColor="White"/>
+                        <Label Text="¿Listo para tu próximo viaje?" 
+                               FontSize="14"
+                               TextColor="#E3F2FD"
+                               Margin="0,5,0,0"/>
+                    </VerticalStackLayout>
                 </Grid>
-            </Frame>
 
-            <!-- Vehículos Disponibles -->
-            <Grid Margin="20,10,20,15" ColumnDefinitions="*,Auto">
-                <Label Grid.Column="0"
-                       Text="Vehículos Disponibles" 
-                       FontSize="22"
+                <!-- Barra de búsqueda flotante -->
+                <Border Margin="20,-30,20,15" 
+                        Padding="0"
+                        StrokeThickness="0"
+                        BackgroundColor="White">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16"/>
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="Black" 
+                                Opacity="0.15" 
+                                Radius="15" 
+                                Offset="0,3"/>
+                    </Border.Shadow>
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="15,12">
+                        <Label Grid.Column="0"
+                               Text="🔍" 
+                               FontSize="20"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0"/>
+                        <Entry Grid.Column="1"
+                               Text="{Binding SearchQuery}"
+                               Placeholder="Buscar marca, modelo o ubicación..."
+                               PlaceholderColor="#9E9E9E"
+                               TextColor="#212121"
+                               BackgroundColor="Transparent"
+                               FontSize="14"
+                               VerticalOptions="Center"/>
+                        <Label Grid.Column="2"
+                               Text="✕"
+                               FontSize="18"
+                               TextColor="#9E9E9E"
+                               VerticalOptions="Center"
+                               Padding="10,0"
+                               IsVisible="{Binding SearchQuery, Converter={StaticResource InvertedBoolConverter}}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ClearSearchCommand}"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+                </Border>
+
+                <!-- Filtros por categoría -->
+                <Label Text="Categorías"
+                       FontSize="18"
                        FontAttributes="Bold"
                        TextColor="#212121"
-                       VerticalOptions="Center"/>
-                
-                <Button Grid.Column="1"
-                        Text="🔄"
-                        FontSize="20"
-                        BackgroundColor="Transparent"
-                        TextColor="#1E88E5"
-                        Padding="10"
-                        Clicked="OnRefreshClicked"
-                        ToolTipProperties.Text="Actualizar lista"/>
-            </Grid>
+                       Margin="20,15,20,10"/>
 
-            <VerticalStackLayout x:Name="VehiclesContainer" 
-                                 Spacing="0" 
-                                 Padding="20,0,20,30"/>
+                <ScrollView Orientation="Horizontal" 
+                            HorizontalScrollBarVisibility="Never"
+                            Margin="0,0,0,15">
+                    <HorizontalStackLayout Spacing="10" Padding="20,5">
+                        <!-- Todos -->
+                        <Border StrokeThickness="1.5"
+                                Padding="18,10"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Todos">
+                                    <Setter Property="Stroke" Value="#1E88E5"/>
+                                    <Setter Property="BackgroundColor" Value="#1E88E5"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Económicos">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Premium">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Lujo">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding FilterByCategoryCommand}" 
+                                                     CommandParameter="Todos"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Text="🚘" FontSize="14" VerticalOptions="Center"/>
+                                <Label Text="Todos" 
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" 
+                                                     Binding="{Binding SelectedCategory}" 
+                                                     Value="Todos">
+                                            <Setter Property="TextColor" Value="White"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </HorizontalStackLayout>
+                        </Border>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                        <!-- Económicos -->
+                        <Border StrokeThickness="1.5"
+                                Padding="18,10"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Económicos">
+                                    <Setter Property="Stroke" Value="#4CAF50"/>
+                                    <Setter Property="BackgroundColor" Value="#4CAF50"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Todos">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Premium">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Lujo">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding FilterByCategoryCommand}" 
+                                                     CommandParameter="Económicos"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Text="💰" FontSize="14" VerticalOptions="Center"/>
+                                <Label Text="Económicos" 
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" 
+                                                     Binding="{Binding SelectedCategory}" 
+                                                     Value="Económicos">
+                                            <Setter Property="TextColor" Value="White"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <!-- Premium -->
+                        <Border StrokeThickness="1.5"
+                                Padding="18,10"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Premium">
+                                    <Setter Property="Stroke" Value="#FF9800"/>
+                                    <Setter Property="BackgroundColor" Value="#FF9800"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Todos">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Económicos">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Lujo">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding FilterByCategoryCommand}" 
+                                                     CommandParameter="Premium"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Text="✨" FontSize="14" VerticalOptions="Center"/>
+                                <Label Text="Premium" 
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" 
+                                                     Binding="{Binding SelectedCategory}" 
+                                                     Value="Premium">
+                                            <Setter Property="TextColor" Value="White"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <!-- Lujo -->
+                        <Border StrokeThickness="1.5"
+                                Padding="18,10"
+                                BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Lujo">
+                                    <Setter Property="Stroke" Value="#9C27B0"/>
+                                    <Setter Property="BackgroundColor" Value="#9C27B0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Todos">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Económicos">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" 
+                                             Binding="{Binding SelectedCategory}" 
+                                             Value="Premium">
+                                    <Setter Property="Stroke" Value="#E0E0E0"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding FilterByCategoryCommand}" 
+                                                     CommandParameter="Lujo"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Text="💎" FontSize="14" VerticalOptions="Center"/>
+                                <Label Text="Lujo" 
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" 
+                                                     Binding="{Binding SelectedCategory}" 
+                                                     Value="Lujo">
+                                            <Setter Property="TextColor" Value="White"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <!-- Encabezado de resultados -->
+                <Grid Margin="20,5,20,15" ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="Vehículos disponibles" 
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="#212121"/>
+                        <Label FontSize="13"
+                               TextColor="#757575">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding TotalVehicles}" FontAttributes="Bold" TextColor="#1E88E5"/>
+                                    <Span Text=" autos encontrados"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Lista de vehículos -->
+                <CollectionView ItemsSource="{Binding AvailableVehicles}"
+                                Margin="20,0,20,20"
+                                ItemSizingStrategy="MeasureFirstItem">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="12"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="{x:Type viewmodels:MainViewModel}">
+                            <Border StrokeThickness="0"
+                                    Padding="0"
+                                    BackgroundColor="White">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="16"/>
+                                </Border.StrokeShape>
+                                <Border.Shadow>
+                                    <Shadow Brush="Black" 
+                                            Opacity="0.1" 
+                                            Radius="10" 
+                                            Offset="0,3"/>
+                                </Border.Shadow>
+                                <Grid Padding="15" 
+                                      ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="14">
+
+                                    <!-- Icono del vehículo -->
+                                    <Border Grid.Column="0"
+                                            WidthRequest="75"
+                                            HeightRequest="75"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Center">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="14"/>
+                                        </Border.StrokeShape>
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#E3F2FD" Offset="0.0"/>
+                                                <GradientStop Color="#BBDEFB" Offset="1.0"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <Label Text="🚗"
+                                               FontSize="40"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Border>
+
+                                    <!-- Información del vehículo -->
+                                    <VerticalStackLayout Grid.Column="1" 
+                                                         Spacing="4"
+                                                         VerticalOptions="Center">
+                                        <Label Text="{Binding Brand, StringFormat='{0} '}"
+                                               FontSize="11"
+                                               TextColor="#9E9E9E"
+                                               FontAttributes="Bold"
+                                               TextTransform="Uppercase"/>
+                                        <Label Text="{Binding DisplayName}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="#212121"
+                                               LineBreakMode="TailTruncation"/>
+                                        
+                                        <!-- Detalles -->
+                                        <HorizontalStackLayout Spacing="10" Margin="0,3,0,0">
+                                            <HorizontalStackLayout Spacing="3">
+                                                <Label Text="👥" FontSize="11"/>
+                                                <Label Text="{Binding Seats, StringFormat='{0}'}" 
+                                                       FontSize="11" 
+                                                       TextColor="#616161"/>
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout Spacing="3">
+                                                <Label Text="⚙️" FontSize="11"/>
+                                                <Label Text="{Binding TransmissionDisplay}" 
+                                                       FontSize="11" 
+                                                       TextColor="#616161"/>
+                                            </HorizontalStackLayout>
+                                        </HorizontalStackLayout>
+
+                                        <!-- Ubicación -->
+                                        <HorizontalStackLayout Spacing="3" 
+                                                              Margin="0,2,0,0"
+                                                              IsVisible="{Binding Location, Converter={StaticResource InvertedBoolConverter}}">
+                                            <Label Text="📍" FontSize="11"/>
+                                            <Label Text="{Binding Location}" 
+                                                   FontSize="11" 
+                                                   TextColor="#1E88E5"
+                                                   LineBreakMode="TailTruncation"/>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <!-- Precio -->
+                                    <VerticalStackLayout Grid.Column="2" 
+                                                         Spacing="2"
+                                                         VerticalOptions="Center"
+                                                         HorizontalOptions="End">
+                                        <Label HorizontalOptions="End">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="$" 
+                                                          FontSize="12" 
+                                                          TextColor="#4CAF50"
+                                                          FontAttributes="Bold"/>
+                                                    <Span Text="{Binding PricePerDay, StringFormat='{0:F0}'}" 
+                                                          FontSize="22" 
+                                                          TextColor="#4CAF50"
+                                                          FontAttributes="Bold"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label Text="por día" 
+                                               FontSize="10" 
+                                               TextColor="#9E9E9E"
+                                               HorizontalOptions="End"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout Padding="20,40" Spacing="15" HorizontalOptions="Center">
+                            <Label Text="🔍" 
+                                   FontSize="64"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="No se encontraron vehículos" 
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="#212121"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Intenta con otra búsqueda o categoría" 
+                                   FontSize="14"
+                                   TextColor="#757575"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+
+                <!-- Espacio inferior -->
+                <BoxView HeightRequest="20" BackgroundColor="Transparent"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
 
 </ContentPage>
