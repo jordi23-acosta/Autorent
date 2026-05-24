@@ -1,4 +1,5 @@
 using AUTORENT.Models;
+using AUTORENT.Pages;
 using AUTORENT.Services;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -28,6 +29,7 @@ namespace AUTORENT.ViewModels
             RefreshCommand = new AsyncRelayCommand(LoadAvailableVehiclesAsync);
             FilterByCategoryCommand = new RelayCommand<string>(FilterByCategory);
             ClearSearchCommand = new RelayCommand(ClearSearch);
+            ViewVehicleDetailCommand = new AsyncRelayCommand<Vehicle>(ViewVehicleDetailAsync);
 
             // Obtener nombre del usuario
             if (_authService.CurrentUser != null)
@@ -84,6 +86,7 @@ namespace AUTORENT.ViewModels
         public ICommand RefreshCommand { get; }
         public ICommand FilterByCategoryCommand { get; }
         public ICommand ClearSearchCommand { get; }
+        public ICommand ViewVehicleDetailCommand { get; }
 
         public async Task LoadAvailableVehiclesAsync()
         {
@@ -214,6 +217,28 @@ namespace AUTORENT.ViewModels
             if (price < 800) return "Económico";
             if (price < 1500) return "Premium";
             return "Lujo";
+        }
+
+        private async Task ViewVehicleDetailAsync(Vehicle? vehicle)
+        {
+            if (vehicle == null) return;
+
+            try
+            {
+                if (Application.Current?.MainPage is Shell shell 
+                    && shell.CurrentPage?.Navigation != null)
+                {
+                    await shell.CurrentPage.Navigation.PushAsync(new VehicleDetailPage(vehicle));
+                }
+                else if (Application.Current?.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PushAsync(new VehicleDetailPage(vehicle));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navegando a detalle: {ex.Message}");
+            }
         }
     }
 }
