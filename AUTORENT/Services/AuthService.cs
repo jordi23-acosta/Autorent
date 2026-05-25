@@ -222,6 +222,34 @@ namespace AUTORENT.Services
 
                 await LoadCurrentUserProfile();
 
+                // Si LoadCurrentUserProfile no cargó el usuario por timing,
+                // asignarlo manualmente con los datos que ya tenemos
+                if (_currentUser == null && session.User != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[REGISTRO] LoadCurrentUserProfile no cargó usuario, asignando manualmente");
+                    _currentUser = new User
+                    {
+                        Id = session.User.Id,
+                        Name = fullName,
+                        Email = email,
+                        Phone = phone,
+                        Role = userType == "propietario" ? UserRole.Owner : UserRole.Driver,
+                        CreatedAt = DateTime.UtcNow,
+                        IsVerified = true
+                    };
+                    System.Diagnostics.Debug.WriteLine($"[REGISTRO] ✅ Usuario asignado manualmente con rol: {_currentUser.Role}");
+                }
+                else if (_currentUser != null)
+                {
+                    // Forzar el rol correcto según el registro
+                    var expectedRole = userType == "propietario" ? UserRole.Owner : UserRole.Driver;
+                    if (_currentUser.Role != expectedRole)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[REGISTRO] ⚠️ Rol incorrecto detectado, corrigiendo de {_currentUser.Role} a {expectedRole}");
+                        _currentUser.Role = expectedRole;
+                    }
+                }
+
                 string successMessage = session.User.EmailConfirmedAt == null 
                     ? "Cuenta creada. Por favor verifica tu email para continuar." 
                     : "Cuenta creada exitosamente";
