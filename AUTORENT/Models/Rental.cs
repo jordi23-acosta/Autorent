@@ -14,7 +14,7 @@ namespace AUTORENT.Models
     [Table("rentals")]
     public class Rental : BaseModel
     {
-        [PrimaryKey("id")]
+        [PrimaryKey("id", false)]
         public string Id { get; set; } = string.Empty;
 
         [Column("vehicle_id")]

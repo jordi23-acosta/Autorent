@@ -243,6 +243,15 @@ namespace AUTORENT.ViewModels
                     return;
                 }
 
+                if (_authService.CurrentUser == null)
+                {
+                    GeneralError = "Sesión inválida. Cierra y vuelve a iniciar sesión";
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] OwnerId: {_authService.CurrentUser.Id}");
+                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] Marca: {Brand}, Modelo: {Model}, Año: {year}, Precio: {price}");
+
                 var vehicle = new Vehicle
                 {
                     Brand = Brand.Trim(),
@@ -252,21 +261,23 @@ namespace AUTORENT.ViewModels
                     Color = Color.Trim(),
                     Seats = Seats,
                     Transmission = IsAutomatic ? "automatico" : "manual",
+                    FuelType = "gasolina",
                     PricePerDay = price,
                     Description = Description?.Trim() ?? "",
                     Location = Location?.Trim() ?? "",
                     IsAvailable = true,
-                    ImageUrl = _photoPaths[0],
-                    OwnerId = _authService.CurrentUser!.Id,
+                    // No guardamos rutas locales como URL (causa errores)
+                    ImageUrl = null,
+                    OwnerId = _authService.CurrentUser.Id,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] Guardando: {vehicle.Brand} {vehicle.Model}");
+                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] Insertando vehículo en BD...");
                 
-                await client.From<Vehicle>().Insert(vehicle);
+                var response = await client.From<Vehicle>().Insert(vehicle);
                 
-                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] ✅ Vehículo guardado");
+                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] ✅ Vehículo guardado. Modelos: {response?.Models?.Count ?? 0}");
 
                 await Application.Current!.MainPage!.DisplayAlert(
                     "🎉 ¡Publicado!",
@@ -278,6 +289,11 @@ namespace AUTORENT.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] ❌ Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] Stack: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ADD VEHICLE] Inner: {ex.InnerException.Message}");
+                }
                 GeneralError = ErrorTranslator.TranslateError(ex.Message);
             }
             finally
