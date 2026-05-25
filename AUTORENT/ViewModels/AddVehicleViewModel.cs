@@ -205,14 +205,9 @@ namespace AUTORENT.ViewModels
 
         private bool CanPublish()
         {
-            return IsBrandValid &&
-                   IsModelValid &&
-                   IsYearValid &&
-                   IsPlatesValid &&
-                   IsColorValid &&
-                   IsPriceValid &&
-                   PhotoCount >= 1 &&
-                   !IsBusy;
+            // Botón siempre habilitado si no está ocupado
+            // La validación se hace dentro de PublishAsync con mensajes claros
+            return !IsBusy;
         }
 
         private async Task PublishAsync()
@@ -224,15 +219,40 @@ namespace AUTORENT.ViewModels
                 IsBusy = true;
                 GeneralError = string.Empty;
 
+                // Validaciones manuales con mensajes claros
+                if (!IsBrandValid)
+                {
+                    GeneralError = "Ingresa la marca del vehículo";
+                    return;
+                }
+
+                if (!IsModelValid)
+                {
+                    GeneralError = "Ingresa el modelo del vehículo";
+                    return;
+                }
+
                 if (!int.TryParse(Year, out int year) || year < 1990 || year > DateTime.Now.Year + 1)
                 {
-                    GeneralError = "El año debe estar entre 1990 y el año actual";
+                    GeneralError = $"El año debe estar entre 1990 y {DateTime.Now.Year + 1}";
+                    return;
+                }
+
+                if (!IsColorValid)
+                {
+                    GeneralError = "Ingresa el color del vehículo";
+                    return;
+                }
+
+                if (!IsPlatesValid)
+                {
+                    GeneralError = "Ingresa las placas (mínimo 5 caracteres)";
                     return;
                 }
 
                 if (!decimal.TryParse(Price, out decimal price) || price <= 0)
                 {
-                    GeneralError = "Ingresa un precio mayor a $0";
+                    GeneralError = "Ingresa un precio válido mayor a $0";
                     return;
                 }
 
