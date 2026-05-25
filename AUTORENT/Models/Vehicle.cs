@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
@@ -78,13 +79,17 @@ namespace AUTORENT.Models
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; }
 
-        // Propiedades helper
+        // Propiedades helper (no se envían a la BD)
+        [JsonIgnore]
         public bool IsAutomatic => Transmission == "automatico";
-        
+
+        [JsonIgnore]
         public VehicleStatus Status => IsAvailable ? VehicleStatus.Available : VehicleStatus.Rented;
 
+        [JsonIgnore]
         public string DisplayName => $"{Brand} {Model} {Year}";
-        
+
+        [JsonIgnore]
         public string TransmissionDisplay => IsAutomatic ? "Automático" : "Manual";
     }
 }

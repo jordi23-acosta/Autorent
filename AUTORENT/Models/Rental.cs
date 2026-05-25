@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
@@ -54,11 +55,17 @@ namespace AUTORENT.Models
         public DateTime UpdatedAt { get; set; }
 
         // Propiedades de navegación (no mapeadas a la BD)
+        [JsonIgnore]
         public Vehicle? Vehicle { get; set; }
+
+        [JsonIgnore]
         public Profile? Renter { get; set; }
+
+        [JsonIgnore]
         public Profile? Owner { get; set; }
 
-        // Propiedad helper para el status
+        // Propiedad helper para el status (no se envía a la BD)
+        [JsonIgnore]
         public RentalStatus Status
         {
             get => StatusString switch
