@@ -273,11 +273,25 @@ namespace AUTORENT.ViewModels
         private async Task EditVehicleAsync(Vehicle? vehicle)
         {
             if (vehicle == null) return;
-            
-            await Application.Current!.MainPage!.DisplayAlert(
-                "✏️ Editar Vehículo",
-                $"Función de edición para {vehicle.DisplayName} en desarrollo",
-                "OK");
+
+            try
+            {
+                var editPage = new EditVehiclePage(vehicle);
+
+                if (Application.Current?.MainPage is Shell shell 
+                    && shell.CurrentPage?.Navigation != null)
+                {
+                    await shell.CurrentPage.Navigation.PushAsync(editPage);
+                }
+                else if (Application.Current?.MainPage is NavigationPage navPage)
+                {
+                    await navPage.PushAsync(editPage);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error abriendo editor: {ex.Message}");
+            }
         }
 
         private async Task DeleteVehicleAsync(Vehicle? vehicle)
