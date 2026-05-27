@@ -248,6 +248,30 @@ namespace AUTORENT.ViewModels
                     $"La solicitud ha sido aceptada exitosamente.\n\n{nextSteps}",
                     "OK");
 
+                // Abrir WhatsApp directamente para coordinar
+                if (request.HasPhone)
+                {
+                    bool openWhatsApp = await Application.Current!.MainPage!.DisplayAlert(
+                        "💬 ¿Contactar al conductor?",
+                        $"¿Quieres abrir WhatsApp para coordinar la entrega con {request.RenterName}?",
+                        "Sí, abrir WhatsApp",
+                        "Después");
+
+                    if (openWhatsApp)
+                    {
+                        try
+                        {
+                            var phone = System.Text.RegularExpressions.Regex.Replace(request.RenterPhone, @"\D", "");
+                            string message = Uri.EscapeDataString(
+                                $"Hola {request.RenterName}, soy el propietario del {request.VehicleName} en AUTORENT. Tu solicitud de renta ha sido aceptada ✅. Coordinemos la entrega del vehículo.");
+                            await Microsoft.Maui.ApplicationModel.Browser.OpenAsync($"https://wa.me/{phone}?text={message}");
+                        }
+                        catch { }
+                    }
+                }
+
+                // Forzar recarga
+                IsBusy = false;
                 await LoadDataAsync();
             }
             catch (Exception ex)
@@ -292,6 +316,8 @@ namespace AUTORENT.ViewModels
                     "La solicitud ha sido rechazada",
                     "OK");
 
+                // Forzar recarga
+                IsBusy = false;
                 await LoadDataAsync();
             }
             catch (Exception ex)
