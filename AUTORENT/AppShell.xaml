@@ -9,7 +9,8 @@
     Title="AUTORENT"
     Shell.FlyoutBehavior="Disabled">
 
-    <TabBar>
+    <!-- Tabs para CONDUCTOR -->
+    <TabBar x:Name="DriverTabs">
         <ShellContent
             Title="Inicio"
             Icon="tab_home.svg"
@@ -23,17 +24,31 @@
             Route="RentalsPage" />
 
         <ShellContent
-            x:Name="MyVehiclesTab"
+            Title="Perfil"
+            Icon="tab_profile.svg"
+            ContentTemplate="{DataTemplate local:ProfilePage}"
+            Route="ProfilePage" />
+    </TabBar>
+
+    <!-- Tabs para PROPIETARIO -->
+    <TabBar x:Name="OwnerTabs">
+        <ShellContent
             Title="Mis Autos"
             Icon="tab_cars.svg"
             ContentTemplate="{DataTemplate pages:MyVehiclesPage}"
             Route="MyVehiclesPage" />
 
         <ShellContent
+            Title="Solicitudes"
+            Icon="tab_rentals.svg"
+            ContentTemplate="{DataTemplate local:RentalsPage}"
+            Route="OwnerRentalsTab" />
+
+        <ShellContent
             Title="Perfil"
             Icon="tab_profile.svg"
             ContentTemplate="{DataTemplate local:ProfilePage}"
-            Route="ProfilePage" />
+            Route="OwnerProfilePage" />
     </TabBar>
 
 </Shell>

@@ -9,26 +9,21 @@ namespace AUTORENT
         {
             InitializeComponent();
 
-            // Aplicar tema claro por defecto (eliminado dark mode)
-            ApplyTheme();
-
-            // Registrar rutas
-            Routing.RegisterRoute(nameof(MyVehiclesPage), typeof(MyVehiclesPage));
-            Routing.RegisterRoute(nameof(AddVehiclePage), typeof(AddVehiclePage));
-            Routing.RegisterRoute(nameof(OwnerEarningsPage), typeof(OwnerEarningsPage));
-            Routing.RegisterRoute(nameof(OwnerRentalsPage), typeof(OwnerRentalsPage));
-            Routing.RegisterRoute(nameof(VehicleDetailPage), typeof(VehicleDetailPage));
-
-            // Configurar tabs según el rol del usuario
-            ConfigureTabsForUserRole();
-        }
-
-        private void ApplyTheme()
-        {
+            // Aplicar tema
             Shell.SetTabBarBackgroundColor(this, Colors.White);
             Shell.SetTabBarForegroundColor(this, Color.FromArgb("#1E88E5"));
             Shell.SetTabBarUnselectedColor(this, Color.FromArgb("#9E9E9E"));
             Shell.SetTabBarTitleColor(this, Color.FromArgb("#212121"));
+
+            // Registrar rutas
+            Routing.RegisterRoute(nameof(AddVehiclePage), typeof(AddVehiclePage));
+            Routing.RegisterRoute(nameof(EditVehiclePage), typeof(EditVehiclePage));
+            Routing.RegisterRoute(nameof(OwnerEarningsPage), typeof(OwnerEarningsPage));
+            Routing.RegisterRoute(nameof(OwnerRentalsPage), typeof(OwnerRentalsPage));
+            Routing.RegisterRoute(nameof(VehicleDetailPage), typeof(VehicleDetailPage));
+
+            // Mostrar tabs según el rol
+            ConfigureTabsForUserRole();
         }
 
         private void ConfigureTabsForUserRole()
@@ -37,15 +32,17 @@ namespace AUTORENT
 
             if (authService.IsOwner())
             {
-                // Para propietarios: mostrar tab "Mis Autos"
-                Title = "AUTORENT - Propietario";
-                MyVehiclesTab.IsVisible = true;
+                // Propietario: Mis Autos, Solicitudes, Perfil
+                DriverTabs.IsVisible = false;
+                OwnerTabs.IsVisible = true;
+                CurrentItem = OwnerTabs;
             }
             else
             {
-                // Para conductores: ocultar tab "Mis Autos"
-                Title = "AUTORENT - Conductor";
-                MyVehiclesTab.IsVisible = false;
+                // Conductor: Inicio (catálogo), Mis Rentas, Perfil
+                DriverTabs.IsVisible = true;
+                OwnerTabs.IsVisible = false;
+                CurrentItem = DriverTabs;
             }
         }
     }
