@@ -111,10 +111,16 @@ namespace AUTORENT.ViewModels
 
                 if (vehiclesResponse?.Models != null)
                 {
+                    // Filtrar los vehículos propios (no mostrar tus propios autos)
+                    var currentUserId = _authService.CurrentUser?.Id ?? "";
+                    
                     foreach (var vehicle in vehiclesResponse.Models)
                     {
-                        _allVehicles.Add(vehicle);
-                        AvailableVehicles.Add(vehicle);
+                        if (vehicle.OwnerId != currentUserId)
+                        {
+                            _allVehicles.Add(vehicle);
+                            AvailableVehicles.Add(vehicle);
+                        }
                     }
                 }
 
