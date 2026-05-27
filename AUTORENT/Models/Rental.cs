@@ -45,7 +45,9 @@ namespace AUTORENT.Models
         [Column("notes")]
         public string? Notes { get; set; }
 
-        [Column("payment_method")]
+        // payment_method: Ejecutar supabase_migration_payment.sql para habilitar
+        // Por ahora se ignora si la columna no existe en la BD
+        [JsonIgnore]
         public string PaymentMethod { get; set; } = "efectivo";
 
         [Column("created_at")]
